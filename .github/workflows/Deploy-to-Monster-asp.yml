@@ -39,7 +39,7 @@ jobs:
           if ($jsonContent.PSObject.Properties.Name -contains "ConnectionStrings" -and
               $jsonContent.ConnectionStrings.PSObject.Properties.Name -contains "Default") {    
 
-              $jsonContent.ConnectionStrings.Default = "${{ secrets.SWEET_CRAFT_TS_CONNECTION_STRING }}"
+              $jsonContent.ConnectionStrings.Default = "${{ secrets.CLOTHES_MARKETPLACE_CONNECTION_STRING }}"
       
               $jsonContent | ConvertTo-Json -Depth 10 | Set-Content $appSettingsPath -Encoding UTF8
       
@@ -61,7 +61,7 @@ jobs:
       - name: Deploy to MonsterASP.NET via WebDeploy
         uses: rasmusbuchholdt/simply-web-deploy@2.1.0
         with:
-          website-name: ${{ secrets.SWEET_CRAFT_TS_WEBSITE_NAME }}
-          server-computer-name: ${{ secrets.SWEET_CRAFT_TS_SERVER_COMPUTER_NAME }}
-          server-username: ${{ secrets.SWEET_CRAFT_TS_SERVER_USERNAME }}
-          server-password: ${{ secrets.SWEET_CRAFT_TS_SERVER_PASSWORD }}
+          website-name: ${{ secrets.CLOTHES_MARKETPLACE_WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.CLOTHES_MARKETPLACE_SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.CLOTHES_MARKETPLACE_SERVER_USERNAME }}
+          server-password: ${{ secrets.CLOTHES_MARKETPLACE_SERVER_PASSWORD }}
