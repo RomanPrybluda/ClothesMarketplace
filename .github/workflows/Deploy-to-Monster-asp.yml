@@ -1,0 +1,67 @@
+name: Deploy-to-Monster-asp
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+  workflow_dispatch: {}
+
+jobs:
+  build_and_deploy:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0 
+
+      - name: Install dependencies
+        run: dotnet restore
+        
+      - name: Replace connection string in appsettings.json
+        shell: pwsh
+        run: |
+          # Поиск файла appsettings.json в проекте
+          $appSettingsPath = Get-ChildItem -Path . -Recurse -Filter "appsettings.json" | Select-Object -First 1 -ExpandProperty FullName
+          if (-not $appSettingsPath) {
+              Write-Host "❌ appsettings.json not found!"
+              exit 1
+          }      
+
+          $jsonContent = Get-Content $appSettingsPath -Raw | ConvertFrom-Json      
+
+          if ($jsonContent.PSObject.Properties.Name -contains "ConnectionStrings" -and
+              $jsonContent.ConnectionStrings.PSObject.Properties.Name -contains "Default") {    
+
+              $jsonContent.ConnectionStrings.Default = "${{ secrets.SWEET_CRAFT_TS_CONNECTION_STRING }}"
+      
+              $jsonContent | ConvertTo-Json -Depth 10 | Set-Content $appSettingsPath -Encoding UTF8
+      
+              Write-Host "✅ Successfully updated ConnectionStrings.Default in: $appSettingsPath"
+          } else {
+              Write-Host "⚠️ ConnectionStrings.Default not found in appsettings.json!"
+              exit 1
+          }
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish --configuration Release --output ./publish --runtime win-x86 
+
+      - name: Test with .NET
+        run: dotnet test
+
+      - name: Deploy to MonsterASP.NET via WebDeploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+        with:
+          website-name: ${{ secrets.SWEET_CRAFT_TS_WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SWEET_CRAFT_TS_SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SWEET_CRAFT_TS_SERVER_USERNAME }}
+          server-password: ${{ secrets.SWEET_CRAFT_TS_SERVER_PASSWORD }}
