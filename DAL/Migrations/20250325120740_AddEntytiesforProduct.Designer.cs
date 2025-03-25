@@ -4,6 +4,7 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ClothesMarketplaceDbContext))]
-    partial class ClothesMarketplaceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250325120740_AddEntytiesforProduct")]
+    partial class AddEntytiesforProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,9 +36,6 @@ namespace DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<Guid>("DeliveryMethodId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -62,8 +62,6 @@ namespace DAL.Migrations
                         .HasDefaultValueSql("GETUTCDATE()");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DeliveryMethodId");
 
                     b.ToTable("Ads");
                 });
@@ -205,23 +203,6 @@ namespace DAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Colors");
-                });
-
-            modelBuilder.Entity("DAL.DeliveryMethod", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWID()");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DeliveryMethods");
                 });
 
             modelBuilder.Entity("DAL.ForWhom", b =>
@@ -495,17 +476,6 @@ namespace DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DAL.Ad", b =>
-                {
-                    b.HasOne("DAL.DeliveryMethod", "DeliveryMethod")
-                        .WithMany("Ads")
-                        .HasForeignKey("DeliveryMethodId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DeliveryMethod");
-                });
-
             modelBuilder.Entity("DAL.Product", b =>
                 {
                     b.HasOne("DAL.Ad", "Ad")
@@ -645,11 +615,6 @@ namespace DAL.Migrations
             modelBuilder.Entity("DAL.Color", b =>
                 {
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("DAL.DeliveryMethod", b =>
-                {
-                    b.Navigation("Ads");
                 });
 
             modelBuilder.Entity("DAL.ForWhom", b =>
