@@ -20,21 +20,24 @@ namespace DAL
                 .IsRequired()
                 .HasMaxLength(1000);
 
-            builder.Property(p => p.ImageUrl)
-                .HasMaxLength(500);
-
-            builder.Property(p => p.Price)
+            builder.Property(p => p.DollarPrice)
                 .IsRequired()
                 .HasPrecision(18, 2);
-
-            builder.Property(p => p.IsActive)
-                .HasDefaultValue(true);
 
             builder.HasOne(p => p.Category)
                 .WithMany(c => c.Products)
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(p => p.ForWhom)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.ForWhomId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(p => p.Images)
+                .WithOne(pi => pi.Product)
+                .HasForeignKey(pi => pi.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
-
 }
