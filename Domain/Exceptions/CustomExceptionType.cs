@@ -8,6 +8,8 @@
         IsAlreadyExists = 4,
         UserIsAlreadyExists = 5,
         InvalidInputData = 6,
-        ProductAlreadyExists = 7
+        ProductAlreadyExists = 7,
+        InvalidData = 8
+
     }
 }
