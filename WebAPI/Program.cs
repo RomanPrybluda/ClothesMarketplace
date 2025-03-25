@@ -20,6 +20,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<ProductService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -53,6 +54,27 @@ using (var scope = app.Services.CreateScope())
 
     var categoryInitializer = new CategoryInitializer(context);
     categoryInitializer.InitializeCategories();
+
+    var brandInitializer = new BrandInitializer(context);
+    brandInitializer.InitializeBrands();
+
+    var colorInitializer = new ColorInitializer(context);
+    colorInitializer.InitializeColors();
+
+    var forWhomInitializer = new ForWhomInitializer(context);
+    forWhomInitializer.InitializeForWhom();
+
+    var productSizeInitializer = new ProductSizeInitializer(context);
+    productSizeInitializer.InitializeProductSizes();
+
+    var deliveryMethodInitializer = new DeliveryMethodInitializer(context);
+    deliveryMethodInitializer.InitializeDeliveryMethods();
+
+    var productConditionInitializer = new ProductConditionInitializer(context);
+    productConditionInitializer.InitializeProductConditions();
+
+    var adAndProductInitializer = new AdAndProductInitializer(context);
+    adAndProductInitializer.InitializeAdsAndProducts();
 }
 
 //if (app.Environment.IsDevelopment())
