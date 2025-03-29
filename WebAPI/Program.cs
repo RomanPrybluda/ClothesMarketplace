@@ -1,12 +1,13 @@
 using DAL;
 using Domain;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Services;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
-
 var localConnectionString = builder.Configuration["ConnectionStrings:LocalConnectionString"];
 
 if (!string.IsNullOrWhiteSpace(localConnectionString))
@@ -21,6 +22,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
 
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<AppUserService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -44,12 +46,17 @@ builder.Services.AddCors(options =>
                         .AllowAnyHeader());
 });
 
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+    .AddEntityFrameworkStores<ClothesMarketplaceDbContext>()
+    .AddDefaultTokenProviders();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<ClothesMarketplaceDbContext>();
-
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ClothesMarketplaceDbContext>();
+    
     context.Database.Migrate();
 
     var categoryInitializer = new CategoryInitializer(context);
@@ -75,13 +82,14 @@ using (var scope = app.Services.CreateScope())
 
     var adAndProductInitializer = new AdAndProductInitializer(context);
     adAndProductInitializer.InitializeAdsAndProducts();
+
+    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    await RoleInitializer.Initialize(userManager, roleManager);
 }
 
-//if (app.Environment.IsDevelopment())
-//{
 app.UseSwagger();
 app.UseSwaggerUI();
-//}
 
 app.UseCors("AllowAll");
 
