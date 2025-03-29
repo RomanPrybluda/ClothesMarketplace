@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/auth")]
+    [Route("/auth")]
     [ApiController]
     public class AuthController(IAuthService _authService): ControllerBase
     {

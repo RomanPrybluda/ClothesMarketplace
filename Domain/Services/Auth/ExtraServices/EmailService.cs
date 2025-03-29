@@ -7,28 +7,31 @@ namespace Domain.Services.Auth.ExtraServices;
 
 public class EmailService(IConfiguration _configuration) : IEmailService
 {
-    public async Task SendEmailAsync(string to, string subject, string body)
+    public async Task SendEmailAsync(string toEmail, string subject, string body)
     {
-        var smtpClient = new SmtpClient(_configuration["Email:SmtpServer"])
+        var smtpClient = new SmtpClient("smtp.gmail.com")
         {
-            Port = int.Parse(_configuration["Email:Port"]),
-            Credentials = new NetworkCredential(
-                _configuration["Email:Username"],
-                _configuration["Email:Password"]
-            ),
+            Port = 587,
+            Credentials = new NetworkCredential("yourusername@gmail.com", "yourpassword"),
             EnableSsl = true
         };
 
         var mailMessage = new MailMessage
         {
-            From = new MailAddress(_configuration["Email:From"]),
+            From = new MailAddress("yourusername@gmail.com"),
             Subject = subject,
             Body = body,
-            IsBodyHtml = true
+            IsBodyHtml = true,
         };
+        mailMessage.To.Add(toEmail);
 
-        mailMessage.To.Add(to);
-
-        await smtpClient.SendMailAsync(mailMessage);
+        try
+        {
+            await smtpClient.SendMailAsync(mailMessage);
+        }
+        catch (SmtpException ex)
+        {
+            Console.WriteLine("SMTP Error: " + ex.Message);
+        }
     }
 }

@@ -76,6 +76,23 @@ public class AuthService(UserManager<AppUser> _userManager,
 
     public async Task<AuthResponse> RegisterAsync(RegistrationDto request)
     {
+        var existingUser = await _userManager.FindByEmailAsync(request.Email);
+        if (existingUser != null)
+        {
+            return new AuthResponse { Success = false, Errors = new List<string> { "Email is already taken." } };
+        }
+
+        var existingUserName = await _userManager.FindByNameAsync(request.UserName);
+        if (existingUserName != null)
+        {
+            return new AuthResponse { Success = false, Errors = new List<string> { "Username is already taken." } };
+        }
+
+        if (request.Password != request.ConfirmPassword) 
+        {
+            return new AuthResponse { Success = false, Errors = new List<string> { "Passwords do not match." } };
+        }
+
         var user = new AppUser
         {
             UserName = request.UserName,
@@ -95,9 +112,11 @@ public class AuthService(UserManager<AppUser> _userManager,
 
         await _emailService.SendEmailAsync(user.Email, "Confirm your email", $"Click here to confirm your email: {confirmationLink}");
 
-        return new AuthResponse 
+        return new AuthResponse
         { Success = true, Message = "User registered successfully. Please confirm your email." };
     }
+
+
 
     public async Task<bool> ResetPasswordAsync(ResetPasswordDto request)
     {
