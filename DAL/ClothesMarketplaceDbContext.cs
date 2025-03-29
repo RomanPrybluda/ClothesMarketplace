@@ -39,6 +39,35 @@ namespace DAL
         {
             builder.ApplyConfigurationsFromAssembly(typeof(ClothesMarketplaceDbContext).Assembly);
             base.OnModelCreating(builder);
-        }
+            
+            builder.Entity<AppUser>(entity =>
+            {
+                entity.HasIndex(u => u.Email).IsUnique();
+                entity.Property(u => u.FirstName).HasMaxLength(100);
+                entity.Property(u => u.LastName).HasMaxLength(100);
+            });
+
+            builder.Entity<IdentityRole>(entity =>
+            {
+                builder.ApplyConfigurationsFromAssembly(typeof(ClothesMarketplaceDbContext).Assembly);
+                base.OnModelCreating(builder);
+                
+                builder.Entity<AppUser>(entity =>
+                {
+                    entity.HasIndex(u => u.Email).IsUnique();
+                    entity.Property(u => u.FirstName).HasMaxLength(100);
+                    entity.Property(u => u.LastName).HasMaxLength(100);
+                });
+
+                builder.Entity<IdentityRole>(entity =>
+                {
+                    entity.HasData(
+                        new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Admin", NormalizedName = "ADMIN" },
+                        new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Seller", NormalizedName = "SELLER" },
+                        new IdentityRole { Id = Guid.NewGuid().ToString(), Name = "Buyer", NormalizedName = "BUYER" }
+                    );
+                });
+            });
+        }    
     }
 }
