@@ -13,15 +13,72 @@ namespace Domain
             _context = context;
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetProductsListAsync()
+        public async Task<PagedResponseDTO<ProductDTO>> GetProductsListAsync(ProductFilterDTO filter)
         {
-            var products = await _context.Products.ToListAsync();
+            var query = _context.Products.AsQueryable();
 
-            if (products == null || !products.Any())
-                throw new CustomException(CustomExceptionType.NotFound, "No Products");
+            if (filter.BrandId.HasValue)
+                query = query.Where(p => p.BrandId == filter.BrandId.Value);
 
-            return products.Select(ProductDTO.FromProduct).ToList();
+            if (filter.CategoryId.HasValue)
+                query = query.Where(p => p.CategoryId == filter.CategoryId.Value);
+
+            if (filter.ColorId.HasValue)
+                query = query.Where(p => p.ColorId == filter.ColorId.Value);
+
+            if (filter.ProductSizeId.HasValue)
+                query = query.Where(p => p.ProductSizeId == filter.ProductSizeId.Value);
+
+            if (filter.MinPrice.HasValue)
+                query = query.Where(p => p.DollarPrice >= filter.MinPrice.Value);
+
+            if (filter.MaxPrice.HasValue)
+                query = query.Where(p => p.DollarPrice <= filter.MaxPrice.Value);
+
+            if (!string.IsNullOrWhiteSpace(filter.SearchQuery))
+                query = query.Where(p => p.Name.ToLower().Contains(filter.SearchQuery.ToLower()));
+
+            if (filter.SortBy.HasValue)
+            {
+                bool isAscending = filter.SortDirection == SortDirection.Asc;
+
+                query = filter.SortBy switch
+                {
+                    ProductSortBy.Price => isAscending ? query.OrderBy(p => p.DollarPrice) : query.OrderByDescending(p => p.DollarPrice),
+                    ProductSortBy.Likes => isAscending ? query.OrderBy(p => p.LikesCount) : query.OrderByDescending(p => p.LikesCount),
+                    _ => query
+                };
+            }
+
+            int totalItems = await query.CountAsync();
+
+            List<Product> products;
+
+            if (filter.PageNumber.HasValue && filter.PageSize.HasValue)
+            {
+                int skip = (filter.PageNumber.Value - 1) * filter.PageSize.Value;
+                int take = filter.PageSize.Value;
+
+                products = await query.Skip(skip).Take(take).ToListAsync();
+
+                return new PagedResponseDTO<ProductDTO>(
+                    products.Select(ProductDTO.FromProduct),
+                    totalItems,
+                    skip,
+                    take
+                );
+            }
+
+            products = await query.ToListAsync();
+
+            return new PagedResponseDTO<ProductDTO>(
+                products.Select(ProductDTO.FromProduct),
+                totalItems,
+                0,
+                totalItems
+            );
         }
+
 
         public async Task<ProductByIdDTO> GetProductByIdAsync(Guid id)
         {

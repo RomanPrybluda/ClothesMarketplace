@@ -20,10 +20,10 @@ namespace WebAPI
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAllProductsAsync()
+        public async Task<ActionResult<PagedResponseDTO<ProductDTO>>> GetAllProductsAsync([FromQuery] ProductFilterDTO filter)
         {
-            var products = await _productService.GetProductsListAsync();
-            return Ok(products);
+            var result = await _productService.GetProductsListAsync(filter);
+            return Ok(result);
         }
 
         [HttpGet("{id:Guid}")]
