@@ -1,7 +1,9 @@
-using DAL;
-using Domain;
-using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
+using DAL;  
+using Domain;  
+using Microsoft.EntityFrameworkCore;  
+using System.Text.Json.Serialization;  
+using Microsoft.AspNetCore.Identity;  
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,12 +29,14 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
-builder.Services.AddSwaggerGen();
-
 builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
 {
     options.UseSqlServer(connectionString, b => b.MigrationsAssembly("DAL"));
 });
+
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+    .AddEntityFrameworkStores<ClothesMarketplaceDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Logging.AddConsole();
 
@@ -75,6 +79,12 @@ using (var scope = app.Services.CreateScope())
 
     var adAndProductInitializer = new AdAndProductInitializer(context);
     adAndProductInitializer.InitializeAdsAndProducts();
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    await RoleInitializer.InitializeRoles(roleManager);
+
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+    await UserInitializer.InitializeUsers(userManager);
 }
 
 //if (app.Environment.IsDevelopment())

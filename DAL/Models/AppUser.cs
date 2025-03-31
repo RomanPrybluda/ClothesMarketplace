@@ -15,5 +15,7 @@ namespace DAL
 
         public DateTime RefreshTokenExpiryTime { get; set; }
 
+        public List<Product> PurchasedProducts { get; set; } = new();
+        public List<Product> SoldProducts { get; set; } = new();
     }
 }
