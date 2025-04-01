@@ -1,30 +1,33 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DAL;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace DAL
+public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
 {
-    public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
+    public void Configure(EntityTypeBuilder<AppUser> builder)
     {
-        public void Configure(EntityTypeBuilder<AppUser> builder)
-        {
-            builder
-                .HasKey(u => u.Id);
+        builder.HasKey(u => u.Id);
 
-            builder
-                .Property(u => u.UserName)
-                .HasMaxLength(100);
+        builder.Property(u => u.UserName)
+            .HasMaxLength(100);
 
-            builder
-                .HasIndex(u => u.UserName)
-                .IsUnique();
+        builder.HasIndex(u => u.UserName)
+            .IsUnique();
 
-            builder
-                .Property(u => u.Email)
-                .HasMaxLength(255);
+        builder.Property(u => u.Email)
+            .HasMaxLength(255);
 
-            builder
-                .HasIndex(u => u.Email)
-                .IsUnique();
-        }
+        builder.HasIndex(u => u.Email)
+            .IsUnique();
+
+        builder.HasMany(u => u.SoldProducts)
+            .WithOne(p => p.Seller)
+            .HasForeignKey(p => p.SellerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(u => u.PurchasedProducts)
+            .WithOne(p => p.Buyer)
+            .HasForeignKey(p => p.BuyerId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
