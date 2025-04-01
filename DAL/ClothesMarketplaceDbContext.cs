@@ -11,7 +11,7 @@ namespace DAL
             this.ChangeTracker.LazyLoadingEnabled = false;
         }
 
-        public DbSet<Ad> Ads { get; set; }
+        public DbSet<ProductDetails> ProductDetails { get; set; }
 
         public DbSet<AppUser> AppUsers { get; set; }
 
@@ -32,8 +32,6 @@ namespace DAL
         public DbSet<ProductImage> ProductImages { get; set; }
 
         public DbSet<ProductSize> ProductSizes { get; set; }
-
-
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

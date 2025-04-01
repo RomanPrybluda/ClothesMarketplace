@@ -1,6 +1,6 @@
 ﻿namespace DAL
 {
-    public class Ad
+    public class ProductDetails
     {
         public Guid Id { get; set; }
 
@@ -16,11 +16,12 @@
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        public Product Product { get; set; }
+        public Guid ProductId { get; set; }
+
+        public Product Product { get; set; } = null!;
 
         public Guid DeliveryMethodId { get; set; }
 
         public DeliveryMethod DeliveryMethod { get; set; } = null!;
     }
 }
-
