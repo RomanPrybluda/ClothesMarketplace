@@ -1,6 +1,8 @@
 using DAL;
 using Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -50,7 +52,22 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ClothesMarketplaceDbContext>();
 
-    context.Database.Migrate();
+    var migrator = context.Database.GetService<IMigrator>();
+
+    var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
+    var pendingMigrations = context.Database.GetPendingMigrations().ToList();
+
+    if (!appliedMigrations.Any())
+    {
+        context.Database.Migrate();
+    }
+    else if (pendingMigrations.Any())
+    {
+        foreach (var migration in pendingMigrations)
+        {
+            migrator.Migrate(migration);
+        }
+    }
 
     var categoryInitializer = new CategoryInitializer(context);
     categoryInitializer.InitializeCategories();
@@ -73,8 +90,8 @@ using (var scope = app.Services.CreateScope())
     var productConditionInitializer = new ProductConditionInitializer(context);
     productConditionInitializer.InitializeProductConditions();
 
-    var adAndProductInitializer = new AdAndProductInitializer(context);
-    adAndProductInitializer.InitializeAdsAndProducts();
+    var adAndProductInitializer = new ProductInitializer(context);
+    adAndProductInitializer.InitializeProducts();
 }
 
 //if (app.Environment.IsDevelopment())
