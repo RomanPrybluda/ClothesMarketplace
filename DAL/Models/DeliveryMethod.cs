@@ -6,6 +6,6 @@
 
         public string Name { get; set; } = string.Empty;
 
-        public List<Ad> Ads { get; set; } = new();
+        public List<ProductDetails>? ProductDetails { get; set; }
     }
 }

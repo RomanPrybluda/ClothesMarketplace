@@ -1,19 +1,31 @@
 using Microsoft.AspNetCore.Identity;
-using System.Threading.Tasks;
 
 namespace DAL
 {
     public class RoleInitializer
     {
-        public static async Task InitializeRoles(RoleManager<IdentityRole> roleManager)
+        private readonly RoleManager<IdentityRole> _roleManager;
+
+        public RoleInitializer(RoleManager<IdentityRole> roleManager)
+        {
+            _roleManager = roleManager;
+        }
+
+        public void InitializeRoles()
         {
             string[] roleNames = { "Admin", "User" };
-            
+
             foreach (var roleName in roleNames)
             {
-                if (!await roleManager.RoleExistsAsync(roleName))
+                var roleExist = _roleManager.RoleExistsAsync(roleName).Result;
+
+                if (!roleExist)
                 {
-                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                    var createResult = _roleManager.CreateAsync(new IdentityRole(roleName)).Result;
+                    if (!createResult.Succeeded)
+                    {
+                        throw new InvalidOperationException($"Fail to create role {roleName}.");
+                    }
                 }
             }
         }
