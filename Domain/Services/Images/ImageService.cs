@@ -29,29 +29,42 @@ namespace Domain.Services.Images
 
         public async Task<string> UploadImageFileAsync(IFormFile file)
         {
-            string path = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot", "images");
-            Directory.CreateDirectory(path);
             var validationResult = await _fileValidator.ValidateAsync(file);
-            var fileName = Path.GetRandomFileName() + Path.GetExtension(file.FileName);
-            var filePath = Path.Combine(path, fileName);
             if (validationResult.IsValid)
             {
-
+                string path = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot", "images");
+                var compressedFile = await CompressImage(file);
+                Directory.CreateDirectory(path);
+                var filePath = Path.Combine(path, compressedFile.FileName);
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await file.CopyToAsync(stream);
-                return $"/images/{fileName}";
+                return $"/images/{compressedFile.FileName}";
             }
             else
             {
-                throw new CustomException(CustomExceptionType.InvalidInputData, validationResult.Errors.First().ErrorMessage);
+                var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
+                throw new ValidationException($"File validation failed: {errors}");
             }
+
         }
 
-        private async Task<bool> CompressImage(IFormFile imageFile)
+        private async Task<IFormFile> CompressImage(IFormFile imageFile)
         {
             using var imageStream = imageFile.OpenReadStream();
             using var image = await Image.LoadAsync(imageStream);
+            using var memoryStream = new MemoryStream();
+            var encoder = _encoderFactory.GetEncoder(imageFile);
+            await image.SaveAsync(memoryStream, encoder);
+            memoryStream.Position = 0;
+            var imageName = GenerateUniqueImageName(imageFile.FileName);
+            return new FormFile(memoryStream, 0, memoryStream.Length, imageName, imageName);
+        }
 
+        private string GenerateUniqueImageName(string fileName)
+        {
+            var fileExtension = Path.GetExtension(fileName);
+            var uniqueFileName = Path.GetRandomFileName() + fileExtension;
+            return uniqueFileName;
         }
     }
 }

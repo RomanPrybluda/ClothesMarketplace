@@ -20,10 +20,10 @@ namespace Domain.Helpers
             var extension = Path.GetExtension(file.Name).ToLowerInvariant();
             return extension switch
             {
-                ".jpg" => new JpegEncoder(),
-                ".jpeg" => new JpegEncoder(),
-                ".png" => new PngEncoder(),
-                ".webp" => new WebpEncoder(),
+                ".jpg" => new JpegEncoder() { Quality = 75},
+                ".jpeg" => new JpegEncoder() { Quality = 75},
+                ".png" => new PngEncoder() { CompressionLevel = PngCompressionLevel.BestCompression},
+                ".webp" => new WebpEncoder() { Quality = 60},
                 _ => throw new NotSupportedImageFormatException($"Unsupported image format: {extension}")
             };
         }
