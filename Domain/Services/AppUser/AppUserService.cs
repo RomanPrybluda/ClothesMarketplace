@@ -1,4 +1,5 @@
 using DAL;
+using Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -13,30 +14,75 @@ public class AppUserService
         _userManager = userManager;
     }
 
-    public async Task<List<AppUser>> GetAllUsersAsync() => await _userManager.Users.ToListAsync();
-
-    public async Task<AppUser?> GetUserByIdAsync(string id) => await _userManager.FindByIdAsync(id);
-
-    public async Task<bool> CreateUserAsync(AppUser user, string password)
+    public async Task<PagedResult<AppUserDTO>> GetAllUsersAsync(int page, int pageSize)
     {
-        var result = await _userManager.CreateAsync(user, password);
-        return result.Succeeded;
+        var query = _userManager.Users.Select(u => new AppUserDTO
+        {
+            Id = u.Id,
+            UserName = u.UserName,
+            Email = u.Email
+        });
+
+        var totalUsers = await query.CountAsync();
+        var users = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+        return new PagedResult<AppUserDTO> { Items = users, TotalCount = totalUsers };
     }
 
-    public async Task<bool> UpdateUserAsync(AppUser user)
-    {
-        var result = await _userManager.UpdateAsync(user);
-        return result.Succeeded;
-    }
-
-    public async Task<bool> DeleteUserAsync(string id)
+    public async Task<AppUserDTO?> GetUserByIdAsync(string id)
     {
         var user = await _userManager.FindByIdAsync(id);
-        if (user != null)
+        return user is not null ? new AppUserDTO
+        { 
+            Id = user.Id, 
+            UserName = user.UserName,
+            Email = user.Email 
+        } : null;
+    }
+    
+    public async Task<AppUserDTO?> GetUserByUserNameAsync(string userName)
+    {
+        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+        return user is not null ? new AppUserDTO
+        { 
+            Id = user.Id, 
+            UserName = user.UserName,
+            Email = user.Email 
+        } : null;
+    }
+
+    public async Task<AppUserDTO?> UpdateUserAsync(string id, UpdateUserDTO request)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+
+        if (user == null)
         {
-            var result = await _userManager.DeleteAsync(user);
-            return result.Succeeded;
+            return null;
         }
-        return false;
+        request.UpdateUser(user);
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            return null;
+        }
+        return new AppUserDTO
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email
+        };
+    }
+
+
+    public async Task DeleteUserAsync(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user is not null)
+        {
+            await _userManager.DeleteAsync(user);
+        }
     }
 }

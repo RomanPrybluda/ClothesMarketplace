@@ -1,10 +1,11 @@
 using DAL;
+using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
+[Route("Admin")]
 [ApiController]
 [Authorize(Roles = "Admin")]
 public class AdminController : ControllerBase
@@ -17,43 +18,25 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("users")]
-    public async Task<ActionResult<List<AppUser>>> GetUsers()
+    public async Task<ActionResult<PagedResult<AppUserDTO>>> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
-        var users = await _userService.GetAllUsersAsync();
+        var users = await _userService.GetAllUsersAsync(page, pageSize);
         return Ok(users);
     }
 
-    [HttpPost("create")]
-    public async Task<IActionResult> CreateUser([FromBody] AppUser user, [FromQuery] string password)
-    {
-        if (await _userService.CreateUserAsync(user, password))
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
-
-        return BadRequest("Не вдалося створити користувача");
-    }
-
-    [HttpPut("update/{id}")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] AppUser user)
-    {
-        if (id != user.Id)
-            return BadRequest("ID не співпадають");
-
-        if (await _userService.UpdateUserAsync(user))
-            return NoContent();
-
-        return BadRequest("Не вдалося оновити користувача");
-    }
-
-    [HttpDelete("delete/{id}")]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {
-        if (await _userService.DeleteUserAsync(id))
-            return NoContent();
+        var user = await _userService.GetUserByIdAsync(id); 
+        if (user is null)
+            return NotFound(new { Message = $"Користувача з ID {id} не знайдено" });
 
-        return NotFound();
+        await _userService.DeleteUserAsync(id);
+        return NoContent();
     }
 
-    [HttpGet("user/{id}")]
+
+    [HttpGet("{id}")]
     public async Task<ActionResult<AppUser>> GetUser(string id)
     {
         var user = await _userService.GetUserByIdAsync(id);

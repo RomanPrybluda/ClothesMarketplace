@@ -1,30 +1,25 @@
 using DAL;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[Route("api/[controller]")]
+[Route("AppUser")]
 [ApiController]
 public class AppUserController : ControllerBase
 {
     private readonly AppUserService _userService;
+    private readonly UserManager<AppUser> _userManager;
 
-    public AppUserController(AppUserService userService)
+    public AppUserController(AppUserService userService, UserManager<AppUser> userManager)
     {
         _userService = userService;
-    }
-
-    [HttpGet]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<List<AppUser>>> GetUsers()
-    {
-        return Ok(await _userService.GetAllUsersAsync());
+        _userManager = userManager;
     }
 
     [HttpGet("{id}")]
-    [Authorize(Roles = "Admin,User")]
+    [Authorize(Roles = "User")]
     public async Task<ActionResult<AppUser>> GetUser(string id)
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
@@ -35,52 +30,39 @@ public class AppUserController : ControllerBase
                 return user == null ? NotFound() : Ok(user);
             }
         }
-
         return Unauthorized();
     }
-
-
-    [HttpPost]
-    [AllowAnonymous] 
-    public async Task<IActionResult> CreateUser([FromBody] AppUser user, [FromQuery] string password)
+    
+    [HttpGet("{userName}")]
+    [Authorize(Roles = "User")]
+    public async Task<ActionResult<AppUser>> GetUserByName(string userName)
     {
         if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            return BadRequest("Ви вже авторизовані і не можете створювати нового користувача.");
+            if (User.IsInRole("Admin") || User.Identity.Name == userName)
+            {
+                var user = await _userService.GetUserByUserNameAsync(userName);
+                return user == null ? NotFound() : Ok(user);
+            }
         }
-
-        if (await _userService.CreateUserAsync(user, password))
-        {
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
-        }
-
-        return BadRequest("Не вдалося створити користувача");
+        return Unauthorized();
     }
-
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] AppUser user)
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDTO request)
     {
-        if (id != user.Id && !User.IsInRole("Admin"))
-            return BadRequest("ID не співпадають");
+        if (request == null)
+        {
+            return BadRequest("Invalid request data");
+        }
 
-        if (await _userService.UpdateUserAsync(user))
-            return NoContent();
+        var updatedUser = await _userService.UpdateUserAsync(id, request);
+        
+        if (updatedUser == null)
+        {
+            return NotFound("User not found or update failed");
+        }
 
-        return BadRequest("Не вдалося оновити користувача");
-    }
-
-    [HttpDelete("{id}")]
-    [Authorize(Roles = "Admin,User")]
-    public async Task<IActionResult> DeleteUser(string id)
-    {
-        if (id != User.Identity.Name && !User.IsInRole("Admin"))
-            return BadRequest("Ви не можете видаляти цього користувача");
-
-        if (await _userService.DeleteUserAsync(id))
-            return NoContent();
-
-        return NotFound();
+        return Ok(updatedUser);
     }
 }

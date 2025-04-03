@@ -126,6 +126,9 @@ using (var scope = app.Services.CreateScope())
     var appUserInitializer = new AppUserInitializer(userManager);
     appUserInitializer.InitializeAppUsers();
 
+    var adminInitializer = new AdminInitializer(userManager, roleManager);
+    await adminInitializer.InitializeAdmin();
+
     var productInitializer = new ProductInitializer(context);
     productInitializer.InitializeProducts();
 }
