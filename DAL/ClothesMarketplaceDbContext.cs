@@ -37,6 +37,18 @@ namespace DAL
         {
             builder.ApplyConfigurationsFromAssembly(typeof(ClothesMarketplaceDbContext).Assembly);
             base.OnModelCreating(builder);
+
+             builder.Entity<AppUser>()
+            .HasMany(u => u.PurchasedProducts)
+            .WithOne()
+            .HasForeignKey("BuyerId")
+            .OnDelete(DeleteBehavior.Restrict);
+
+             builder.Entity<AppUser>()
+            .HasMany(u => u.SoldProducts)
+            .WithOne()
+            .HasForeignKey("SellerId")
+            .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

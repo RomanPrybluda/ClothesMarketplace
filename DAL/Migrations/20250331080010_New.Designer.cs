@@ -4,6 +4,7 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,16 +12,64 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ClothesMarketplaceDbContext))]
-    partial class ClothesMarketplaceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250331080010_New")]
+    partial class New
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "8.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("DAL.Ad", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWID()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.Property<Guid>("DeliveryMethodId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
+                    b.Property<string>("ProductLocation")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeliveryMethodId");
+
+                    b.ToTable("Ads");
+                });
 
             modelBuilder.Entity("DAL.AppUser", b =>
                 {
@@ -202,13 +251,13 @@ namespace DAL.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
+                    b.Property<Guid>("AdId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("BuyerId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("BuyerId1")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("CategoryId")
@@ -230,9 +279,7 @@ namespace DAL.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("LikesCount")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(0);
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -242,25 +289,20 @@ namespace DAL.Migrations
                     b.Property<Guid>("ProductConditionId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ProductDetailsId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("ProductSizeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SellerId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("SellerId1")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AdId")
+                        .IsUnique();
 
                     b.HasIndex("BrandId");
 
                     b.HasIndex("BuyerId");
-
-                    b.HasIndex("BuyerId1");
 
                     b.HasIndex("CategoryId");
 
@@ -270,15 +312,9 @@ namespace DAL.Migrations
 
                     b.HasIndex("ProductConditionId");
 
-                    b.HasIndex("ProductDetailsId")
-                        .IsUnique()
-                        .HasFilter("[ProductDetailsId] IS NOT NULL");
-
                     b.HasIndex("ProductSizeId");
 
                     b.HasIndex("SellerId");
-
-                    b.HasIndex("SellerId1");
 
                     b.ToTable("Products");
                 });
@@ -287,66 +323,15 @@ namespace DAL.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWID()");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.ToTable("ProductConditions");
-                });
-
-            modelBuilder.Entity("DAL.ProductDetails", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("NEWID()");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<Guid>("DeliveryMethodId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("ProductLocation")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnUpdate()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeliveryMethodId");
-
-                    b.ToTable("ProductDetails");
                 });
 
             modelBuilder.Entity("DAL.ProductImage", b =>
@@ -523,8 +508,25 @@ namespace DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("DAL.Ad", b =>
+                {
+                    b.HasOne("DAL.DeliveryMethod", "DeliveryMethod")
+                        .WithMany("Ads")
+                        .HasForeignKey("DeliveryMethodId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DeliveryMethod");
+                });
+
             modelBuilder.Entity("DAL.Product", b =>
                 {
+                    b.HasOne("DAL.Ad", "Ad")
+                        .WithOne("Product")
+                        .HasForeignKey("DAL.Product", "AdId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DAL.Brand", "Brand")
                         .WithMany("Products")
                         .HasForeignKey("BrandId")
@@ -535,10 +537,6 @@ namespace DAL.Migrations
                         .WithMany("PurchasedProducts")
                         .HasForeignKey("BuyerId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("DAL.AppUser", "Buyer")
-                        .WithMany()
-                        .HasForeignKey("BuyerId1");
 
                     b.HasOne("DAL.Category", "Category")
                         .WithMany("Products")
@@ -561,13 +559,8 @@ namespace DAL.Migrations
                     b.HasOne("DAL.ProductCondition", "ProductCondition")
                         .WithMany("Products")
                         .HasForeignKey("ProductConditionId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("DAL.ProductDetails", "ProductDetails")
-                        .WithOne("Product")
-                        .HasForeignKey("DAL.Product", "ProductDetailsId")
-                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("DAL.ProductSize", "ProductSize")
                         .WithMany("Products")
@@ -579,13 +572,9 @@ namespace DAL.Migrations
                         .HasForeignKey("SellerId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("DAL.AppUser", "Seller")
-                        .WithMany()
-                        .HasForeignKey("SellerId1");
+                    b.Navigation("Ad");
 
                     b.Navigation("Brand");
-
-                    b.Navigation("Buyer");
 
                     b.Navigation("Category");
 
@@ -595,22 +584,7 @@ namespace DAL.Migrations
 
                     b.Navigation("ProductCondition");
 
-                    b.Navigation("ProductDetails");
-
                     b.Navigation("ProductSize");
-
-                    b.Navigation("Seller");
-                });
-
-            modelBuilder.Entity("DAL.ProductDetails", b =>
-                {
-                    b.HasOne("DAL.DeliveryMethod", "DeliveryMethod")
-                        .WithMany("ProductDetails")
-                        .HasForeignKey("DeliveryMethodId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("DeliveryMethod");
                 });
 
             modelBuilder.Entity("DAL.ProductImage", b =>
@@ -675,6 +649,12 @@ namespace DAL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DAL.Ad", b =>
+                {
+                    b.Navigation("Product")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DAL.AppUser", b =>
                 {
                     b.Navigation("PurchasedProducts");
@@ -699,7 +679,7 @@ namespace DAL.Migrations
 
             modelBuilder.Entity("DAL.DeliveryMethod", b =>
                 {
-                    b.Navigation("ProductDetails");
+                    b.Navigation("Ads");
                 });
 
             modelBuilder.Entity("DAL.ForWhom", b =>
@@ -715,12 +695,6 @@ namespace DAL.Migrations
             modelBuilder.Entity("DAL.ProductCondition", b =>
                 {
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("DAL.ProductDetails", b =>
-                {
-                    b.Navigation("Product")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("DAL.ProductSize", b =>

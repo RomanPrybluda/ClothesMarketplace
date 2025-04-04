@@ -30,7 +30,30 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("APIKey", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey
+    });
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "APIKey"
+                }
+            },
+            new List<string>()
+        }
+    });
+});
 
 builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
 {
@@ -102,6 +125,9 @@ using (var scope = app.Services.CreateScope())
 
     var appUserInitializer = new AppUserInitializer(userManager);
     appUserInitializer.InitializeAppUsers();
+
+    var adminInitializer = new AdminInitializer(userManager, roleManager);
+    await adminInitializer.InitializeAdmin();
 
     var productInitializer = new ProductInitializer(context);
     productInitializer.InitializeProducts();
