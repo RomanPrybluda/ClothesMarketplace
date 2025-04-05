@@ -34,11 +34,11 @@ namespace Domain.Services.Images
             if (validationResult.IsValid)
             {
                 string path = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot", "images");
-                var compressedFile = await CompressImage(file);
+                var compressedContent = await CompressImage(file);
                 Directory.CreateDirectory(path);
-                var filePath = Path.Combine(path, compressedFile.FileName);
-                using var stream = new FileStream(filePath, FileMode.Create);
-                await compressedFile.CopyToAsync(stream);
+                var uniqueFileName = GenerateUniqueImageName(file.FileName);
+                var filePath = Path.Combine(path, uniqueFileName);
+                await File.WriteAllBytesAsync(filePath, compressedContent);
                 return filePath;
             }
             else
@@ -49,16 +49,14 @@ namespace Domain.Services.Images
 
         }
 
-        private async Task<IFormFile> CompressImage(IFormFile imageFile)
+        private async Task<byte[]> CompressImage(IFormFile imageFile)
         {
             using var imageStream = imageFile.OpenReadStream();
             using var image = await Image.LoadAsync(imageStream);
             using var memoryStream = new MemoryStream();
             var encoder = _encoderFactory.GetEncoder(imageFile);
             await image.SaveAsync(memoryStream, encoder);
-            memoryStream.Position = 0;
-            var imageName = GenerateUniqueImageName(imageFile.FileName);
-            return new FormFile(memoryStream, 0, memoryStream.Length, imageName, imageName);
+            return memoryStream.ToArray();
         }
 
         private string GenerateUniqueImageName(string fileName)
