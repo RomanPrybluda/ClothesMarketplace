@@ -1,6 +1,7 @@
 ﻿using Domain.Abstractions;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Hosting;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Services.Images
 {
-    public class ImageService
+    public class ImageService : IImageService
     {
         private readonly IHostEnvironment _hostEnvironment;
         private readonly IValidator<IFormFile> _fileValidator;
@@ -37,8 +38,8 @@ namespace Domain.Services.Images
                 Directory.CreateDirectory(path);
                 var filePath = Path.Combine(path, compressedFile.FileName);
                 using var stream = new FileStream(filePath, FileMode.Create);
-                await file.CopyToAsync(stream);
-                return $"/images/{compressedFile.FileName}";
+                await compressedFile.CopyToAsync(stream);
+                return filePath;
             }
             else
             {
@@ -63,7 +64,7 @@ namespace Domain.Services.Images
         private string GenerateUniqueImageName(string fileName)
         {
             var fileExtension = Path.GetExtension(fileName);
-            var uniqueFileName = Path.GetRandomFileName() + fileExtension;
+            var uniqueFileName = Guid.NewGuid().ToString("N") + fileExtension;
             return uniqueFileName;
         }
     }

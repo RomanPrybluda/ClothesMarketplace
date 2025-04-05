@@ -17,13 +17,13 @@ namespace Domain.Helpers
     {
         public IImageEncoder GetEncoder(IFormFile file)
         {
-            var extension = Path.GetExtension(file.Name).ToLowerInvariant();
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
             return extension switch
             {
-                ".jpg" => new JpegEncoder() { Quality = 75},
-                ".jpeg" => new JpegEncoder() { Quality = 75},
-                ".png" => new PngEncoder() { CompressionLevel = PngCompressionLevel.BestCompression},
-                ".webp" => new WebpEncoder() { Quality = 60},
+                ".jpg" => new JpegEncoder { Quality = 75},
+                ".jpeg" => new JpegEncoder { Quality = 75},
+                ".png" => new PngEncoder { CompressionLevel = PngCompressionLevel.BestCompression},
+                ".webp" => new WebpEncoder { Quality = 60},
                 _ => throw new NotSupportedImageFormatException($"Unsupported image format: {extension}")
             };
         }
