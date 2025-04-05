@@ -46,7 +46,6 @@ namespace Domain.Services.Images
                 var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
                 throw new ValidationException($"File validation failed: {errors}");
             }
-
         }
 
         private async Task<byte[]> CompressImage(IFormFile imageFile)
