@@ -1,5 +1,10 @@
 using DAL;
 using Domain;
+using Domain.Abstractions;
+using Domain.Helpers;
+using Domain.Services.Images;
+using Domain.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -24,6 +29,10 @@ if (string.IsNullOrWhiteSpace(connectionString))
 
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
