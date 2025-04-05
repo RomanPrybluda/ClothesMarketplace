@@ -29,7 +29,7 @@ builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 
-builder.Services.AddValidatorsFromAssemblyContaining<FileValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
