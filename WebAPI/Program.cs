@@ -1,16 +1,15 @@
 using DAL;
 using Domain;
+using WebAPI;
+using System.Text;
 using Domain.Services.Auth.ExtraServices;
-using Domain.Services.Auth.Interfaces;
 using Domain.Services.Auth.Login;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
-using WebAPI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -58,7 +57,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "Bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Введіть токен у форматі: Bearer {your_token}"
+        Description = "Р’РІРµРґС–С‚СЊ С‚РѕРєРµРЅ Сѓ С„РѕСЂРјР°С‚С–: Bearer {your_token}"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -82,9 +81,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ClothesMarketplaceDbContext>()
     .AddDefaultTokenProviders();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IJwtService, JwtService>();
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
 

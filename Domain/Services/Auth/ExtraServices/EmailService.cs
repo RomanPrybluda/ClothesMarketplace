@@ -1,11 +1,10 @@
-﻿using Domain.Services.Auth.Interfaces;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using System.Net.Mail;
 using System.Net;
 
 namespace Domain.Services.Auth.ExtraServices;
 
-public class EmailService(IConfiguration _configuration) : IEmailService
+public class EmailService() 
 {
     public async Task SendEmailAsync(string toEmail, string subject, string body)
     {

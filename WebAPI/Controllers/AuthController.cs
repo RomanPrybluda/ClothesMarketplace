@@ -1,16 +1,25 @@
-﻿using Domain.Services.Auth.Interfaces;
+﻿using System.ComponentModel.DataAnnotations;
 using Domain.Services.Auth.Login.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Domain.Services.Auth.Login;
+using DAL;
 
 namespace WebAPI.Controllers
 {
     [Route("/auth")]
     [ApiController]
-    public class AuthController(IAuthService _authService): ControllerBase
+    public class AuthController : ControllerBase
     {
+        private readonly AuthService _authService;
+
+        public AuthController(AuthService authService)
+        {
+            _authService = authService;
+        }
+
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegistrationDto request)
+        public async Task<IActionResult> Register([FromBody][Required] RegistrationDTO request)
         {
             var result = await _authService.RegisterAsync(request);
             if (!result.Success) return BadRequest(result);
@@ -18,7 +27,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto request)
+        public async Task<IActionResult> Login([FromBody][Required] LoginDTO request)
         {
             var result = await _authService.LoginAsync(request);
             if (!result.Success) return Unauthorized(result);
@@ -37,7 +46,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] string refreshToken)
+        public async Task<IActionResult> RefreshToken([FromBody][Required] string refreshToken)
         {
             var result = await _authService.RefreshTokenAsync(refreshToken);
             if (!result.Success) return Unauthorized(result);
@@ -45,7 +54,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto request)
+        public async Task<IActionResult> ForgotPassword([FromBody][Required] ForgotPasswordDTO request)
         {
             var success = await _authService.ForgotPasswordAsync(request.Email);
             if (!success) return BadRequest(new { message = "Invalid email" });
@@ -54,7 +63,7 @@ namespace WebAPI.Controllers
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto request)
+        public async Task<IActionResult> ResetPassword([FromBody][Required] ResetPasswordDTO request)
         {
             var success = await _authService.ResetPasswordAsync(request);
             if (!success) return BadRequest(new { message = "Failed to reset password" });
@@ -63,7 +72,9 @@ namespace WebAPI.Controllers
         }
 
         [HttpGet("confirm-email")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] string userId, [FromQuery] string token)
+        public async Task<IActionResult> ConfirmEmail(
+            [FromQuery][Required] string userId,
+            [FromQuery][Required] string token)
         {
             var success = await _authService.ConfirmEmailAsync(userId, token);
             if (!success) return BadRequest(new { message = "Invalid or expired token" });
