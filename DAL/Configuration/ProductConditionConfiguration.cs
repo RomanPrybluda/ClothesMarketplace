@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DAL
 {
-    public class ProductConditionConfiguration
+    public class ProductConditionConfiguration : IEntityTypeConfiguration<ProductCondition>
     {
         public void Configure(EntityTypeBuilder<ProductCondition> builder)
         {
