@@ -1,5 +1,7 @@
 ﻿using Domain;
+using Domain.Services.Product.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using Swashbuckle.AspNetCore.Filters;
 using System.ComponentModel.DataAnnotations;
 
@@ -34,8 +36,8 @@ namespace WebAPI
         }
 
         [HttpPost]
-        [SwaggerRequestExample(typeof(CreateProductDTO), typeof(CreateProductExample))]
-        public async Task<ActionResult> CreateProductAsync([FromBody][Required] CreateProductDTO request)
+        //[SwaggerRequestExample(typeof(CreateProductDTO), typeof(CreateProductExample))]
+        public async Task<ActionResult> CreateProductAsync([FromForm] CreateProductTest request)
         {
             var product = await _productService.CreateProductAsync(request);
             return Ok(product);
