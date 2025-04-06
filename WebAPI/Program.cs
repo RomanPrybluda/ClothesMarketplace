@@ -101,10 +101,6 @@ builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
     options.UseSqlServer(connectionString, b => b.MigrationsAssembly("DAL"));
 });
 
-builder.Services.AddIdentity<AppUser, IdentityRole>()
-    .AddEntityFrameworkStores<ClothesMarketplaceDbContext>()
-    .AddDefaultTokenProviders();
-
 builder.Logging.AddConsole();
 
 builder.Services.AddCors(options =>

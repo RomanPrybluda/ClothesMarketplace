@@ -12,13 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ClothesMarketplaceDbContext))]
-<<<<<<<< HEAD:DAL/Migrations/20250405104026__new.Designer.cs
-    [Migration("20250405104026__new")]
-    partial class _new
-========
-    [Migration("20250401202433_InitialMigration")]
-    partial class InitialMigration
->>>>>>>> main:DAL/Migrations/20250401202433_InitialMigration.Designer.cs
+    [Migration("20250406153150_New")]
+    partial class New
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
