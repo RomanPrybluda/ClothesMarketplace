@@ -19,7 +19,7 @@ namespace Domain.Configurations
                 .IsRequired()
                 .HasMaxLength(100);
 
-            builder.HasMany(dm => dm.Ads)
+            builder.HasMany(dm => dm.ProductDetails)
                 .WithOne(ad => ad.DeliveryMethod)
                 .HasForeignKey(ad => ad.DeliveryMethodId)
                 .OnDelete(DeleteBehavior.Restrict);

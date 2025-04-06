@@ -5,8 +5,11 @@ using Domain.Helpers;
 using Domain.Services.Images;
 using Domain.Validators;
 using FluentValidation;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,6 +50,10 @@ builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
     options.UseSqlServer(connectionString, b => b.MigrationsAssembly("DAL"));
 });
 
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+    .AddEntityFrameworkStores<ClothesMarketplaceDbContext>()
+    .AddDefaultTokenProviders();
+
 builder.Logging.AddConsole();
 
 builder.Services.AddCors(options =>
@@ -62,8 +69,25 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ClothesMarketplaceDbContext>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    context.Database.Migrate();
+    var migrator = context.Database.GetService<IMigrator>();
+
+    var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
+    var pendingMigrations = context.Database.GetPendingMigrations().ToList();
+
+    if (!appliedMigrations.Any())
+    {
+        context.Database.Migrate();
+    }
+    else if (pendingMigrations.Any())
+    {
+        foreach (var migration in pendingMigrations)
+        {
+            migrator.Migrate(migration);
+        }
+    }
 
     var categoryInitializer = new CategoryInitializer(context);
     categoryInitializer.InitializeCategories();
@@ -86,8 +110,14 @@ using (var scope = app.Services.CreateScope())
     var productConditionInitializer = new ProductConditionInitializer(context);
     productConditionInitializer.InitializeProductConditions();
 
-    var adAndProductInitializer = new AdAndProductInitializer(context);
-    adAndProductInitializer.InitializeAdsAndProducts();
+    var roleInitializer = new RoleInitializer(roleManager);
+    roleInitializer.InitializeRoles();
+
+    var appUserInitializer = new AppUserInitializer(userManager);
+    appUserInitializer.InitializeAppUsers();
+
+    var productInitializer = new ProductInitializer(context);
+    productInitializer.InitializeProducts();
 }
 
 //if (app.Environment.IsDevelopment())
@@ -97,6 +127,8 @@ app.UseSwaggerUI();
 //}
 
 app.UseCors("AllowAll");
+
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

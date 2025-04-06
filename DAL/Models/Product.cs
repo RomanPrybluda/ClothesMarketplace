@@ -38,9 +38,16 @@
 
         public ProductCondition ProductCondition { get; set; } = null!;
 
-        public Guid AdId { get; set; }
+        public Guid? ProductDetailsId { get; set; }
 
-        public Ad Ad { get; set; } = null!;
+        public ProductDetails? ProductDetails { get; set; } = null;
 
+        public string? SellerId { get; set; }
+
+        public AppUser? Seller { get; set; }
+
+        public string? BuyerId { get; set; }
+
+        public AppUser? Buyer { get; set; }
     }
 }
