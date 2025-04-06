@@ -18,7 +18,7 @@ namespace Domain.Services.Product.DTO
 
         public ICollection<IFormFile> Images { get; set; }
         
-        public int MainFileIndex { get; set; } = 0;
+        public int MainImageIndex { get; set; } = 0;
 
         public Guid BrandId { get; set; } = Guid.Empty;
 

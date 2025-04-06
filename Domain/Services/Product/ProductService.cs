@@ -1,4 +1,5 @@
 ﻿using DAL;
+using Domain.Services.Product.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -89,23 +90,23 @@ namespace Domain
             return ProductByIdDTO.FromProduct(productById);
         }
 
-        public async Task<ProductDTO> CreateProductAsync(CreateProductDTO request)
+        public async Task<ProductDTO> CreateProductAsync(CreateProductTest request)
         {
-            var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name);
-            if (existingProduct != null)
-                throw new CustomException(CustomExceptionType.ProductAlreadyExists, $"Product with Name {request.Name} already exists.");
+            //var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name);
+            //if (existingProduct != null)
+            //    throw new CustomException(CustomExceptionType.ProductAlreadyExists, $"Product with Name {request.Name} already exists.");
 
-            var category = await _context.Categories.FindAsync(request.CategoryId)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"No category found with ID {request.CategoryId}");
+            //var category = await _context.Categories.FindAsync(request.CategoryId)
+            //    ?? throw new CustomException(CustomExceptionType.NotFound, $"No category found with ID {request.CategoryId}");
 
-            ValidateImages(request.Images.Select(img => img.ImageUrl));
+            //ValidateImages(request.Images.Select(img => img.ImageUrl));
 
 
-            var product = CreateProductDTO.ToProduct(request);
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
+            //var product = CreateProductDTO.ToProduct(request);
+            //_context.Products.Add(product);
+            //await _context.SaveChangesAsync();
 
-            return ProductDTO.FromProduct(product);
+            //return ProductDTO.FromProduct(product);
         }
 
         public async Task<ProductDTO> UpdateProductAsync(Guid id, UpdateProductDTO request)

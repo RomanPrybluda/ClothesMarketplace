@@ -12,9 +12,15 @@ namespace Domain.Validators
     {
         public ImageValidator()
         {
-            RuleFor(file => file.Length).LessThanOrEqualTo(5242880).WithMessage("File size must be less than or equal to 5 MB.");
-            RuleFor(file => Path.GetExtension(file.FileName)).Matches(@"\.(jpg|jpeg|png|webp)$").WithMessage("File type must be jpeg, jpg, png or webp.");
-            RuleFor(file => file).NotNull().WithMessage("At least one image is required.");
+            RuleFor(file => file.Length)
+                .LessThanOrEqualTo(1048576)
+                .WithMessage("Image size must be less than 1 MB.");
+            RuleFor(file => Path.GetExtension(file.FileName))
+                .Matches(@"\.(jpg|jpeg|png|webp)$")
+                .WithMessage("File type must be jpeg, jpg, png or webp.");
+            RuleFor(file => file)
+                .NotNull()
+                .WithMessage("The image field cannot be left empty.");
         }
     }
 }
