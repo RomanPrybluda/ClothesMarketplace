@@ -16,7 +16,7 @@ namespace Domain.Services.Product.DTO
 
         public decimal DollarPrice { get; set; }
 
-        public ICollection<IFormFile> Images { get; set; }
+        public List<IFormFile> Images { get; set; }
         
         public int MainImageIndex { get; set; } = 0;
 

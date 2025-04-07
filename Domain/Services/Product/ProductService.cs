@@ -1,4 +1,7 @@
-﻿using DAL;
+﻿using AutoMapper;
+using Azure.Core;
+using DAL;
+using Domain.Abstractions;
 using Domain.Services.Product.DTO;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -8,14 +11,19 @@ namespace Domain
 {
     public class ProductService
     {
-
         private readonly ClothesMarketplaceDbContext _context;
         private readonly IValidator<CreateProductTest> _createProductValidator;
+        private readonly IMapper _mapper;
+        private readonly IImageService _imageService;
 
-        public ProductService(ClothesMarketplaceDbContext context, IValidator<CreateProductTest> createProductValidator)
+        public ProductService(ClothesMarketplaceDbContext context,
+            IValidator<CreateProductTest> createProductValidator,
+            IMapper mapper, IImageService imageService)
         {
             _context = context;
             _createProductValidator = createProductValidator;
+            _mapper = mapper;
+            _imageService = imageService;
         }
 
         public async Task<PagedResponseDTO<ProductDTO>> GetProductsListAsync(ProductFilterDTO filter)
@@ -84,7 +92,6 @@ namespace Domain
             );
         }
 
-
         public async Task<ProductByIdDTO> GetProductByIdAsync(Guid id)
         {
             var productById = await _context.Products.FindAsync(id)
@@ -93,28 +100,22 @@ namespace Domain
             return ProductByIdDTO.FromProduct(productById);
         }
 
-        public async Task<ProductDTO> CreateProductAsync(CreateProductTest request)
+        public async Task<Product> CreateProductAsync(CreateProductTest request)
         {
             var validationResult = await _createProductValidator.ValidateAsync(request);
             if (validationResult.IsValid)
             {
-                //Add here mapping from dto to entity product
+                var product = _mapper.Map<Product>(request);
+                var imagesUrls = await _imageService.UploadMultipleImagesAsync(request.Images);
+                AttachProductImages(product, imagesUrls, request.MainImageIndex);
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
+
+                return product;
             }
-            //var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name);
-            //if (existingProduct != null)
-            //    throw new CustomException(CustomExceptionType.ProductAlreadyExists, $"Product with Name {request.Name} already exists.");
 
-            //var category = await _context.Categories.FindAsync(request.CategoryId)
-            //    ?? throw new CustomException(CustomExceptionType.NotFound, $"No category found with ID {request.CategoryId}");
-
-            //ValidateImages(request.Images.Select(img => img.ImageUrl));
-
-
-            //var product = CreateProductDTO.ToProduct(request);
-            //_context.Products.Add(product);
-            //await _context.SaveChangesAsync();
-
-            //return ProductDTO.FromProduct(product);
+            // TODO: Temporary stub – returns deafult value for product if it is invalid
+            return default;
         }
 
         public async Task<ProductDTO> UpdateProductAsync(Guid id, UpdateProductDTO request)
@@ -161,5 +162,18 @@ namespace Domain
                 }
             }
         }
+
+        private void AttachProductImages(Product product, List<string> imagesUrls, int mainImageIndex)
+        {
+            for (int i = 0; i < imagesUrls.Count; i++)
+            {
+                if (i == mainImageIndex)
+                {
+                    product.Images.Add(new ProductImage { ImageUrl = imagesUrls[i], IsMain = true });
+                }
+                product.Images.Add(new ProductImage { ImageUrl = imagesUrls[i], IsMain = false });
+            }
+        }
     }
 }
+

@@ -35,6 +35,8 @@ builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
