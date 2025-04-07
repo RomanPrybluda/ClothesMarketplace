@@ -1,5 +1,6 @@
 ﻿using DAL;
 using Domain.Services.Product.DTO;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +10,12 @@ namespace Domain
     {
 
         private readonly ClothesMarketplaceDbContext _context;
+        private readonly IValidator<CreateProductTest> _createProductValidator;
 
-        public ProductService(ClothesMarketplaceDbContext context)
+        public ProductService(ClothesMarketplaceDbContext context, IValidator<CreateProductTest> createProductValidator)
         {
             _context = context;
+            _createProductValidator = createProductValidator;
         }
 
         public async Task<PagedResponseDTO<ProductDTO>> GetProductsListAsync(ProductFilterDTO filter)
@@ -92,6 +95,11 @@ namespace Domain
 
         public async Task<ProductDTO> CreateProductAsync(CreateProductTest request)
         {
+            var validationResult = await _createProductValidator.ValidateAsync(request);
+            if (validationResult.IsValid)
+            {
+                //Add here mapping from dto to entity product
+            }
             //var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name);
             //if (existingProduct != null)
             //    throw new CustomException(CustomExceptionType.ProductAlreadyExists, $"Product with Name {request.Name} already exists.");

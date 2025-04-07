@@ -28,15 +28,26 @@ namespace Domain.Services.Images
             _encoderFactory = encoderFactory;
         }
 
-        public async Task<string> UploadImageFileAsync(IFormFile file)
+        public async Task<List<string>> UploadMultipleImagesAsync(List<IFormFile> imageFiles)
         {
-            var validationResult = await _fileValidator.ValidateAsync(file);
+            var urlsList = new List<string>();
+            foreach (var imageFile in imageFiles)
+            {
+                string imageUrl = await UploadImageAsync(imageFile);
+                urlsList.Add(imageUrl);
+            }
+            return urlsList;
+        }
+
+        public async Task<string> UploadImageAsync(IFormFile imageFile)
+        {
+            var validationResult = await _fileValidator.ValidateAsync(imageFile);
             if (validationResult.IsValid)
             {
                 string path = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot", "images");
-                var compressedContent = await CompressImage(file);
+                var compressedContent = await CompressImage(imageFile);
                 Directory.CreateDirectory(path);
-                var uniqueFileName = GenerateUniqueImageName(file.FileName);
+                var uniqueFileName = GenerateUniqueImageName(imageFile.FileName);
                 var filePath = Path.Combine(path, uniqueFileName);
                 await File.WriteAllBytesAsync(filePath, compressedContent);
                 return filePath;

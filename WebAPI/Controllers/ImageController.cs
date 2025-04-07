@@ -17,7 +17,7 @@ namespace WebAPI.Controllers
         [HttpPost("upload")]
         public async Task<IActionResult> UploadImage(IFormFile file)
         {
-                var result = await _imageService.UploadImageFileAsync(file);
+                var result = await _imageService.UploadImageAsync(file);
                 return Ok(new { FilePath = result });
         }
     }
