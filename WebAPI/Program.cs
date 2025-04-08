@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System.Text.Json.Serialization;
+using Domain.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,14 +29,15 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string is not set. Check environment variables, appsettings.json, or secrets.");
 }
 
+
+builder.Services.AddAutoMapper(typeof(ProductCreationProfileMap).Assembly);
+
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
-
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -79,17 +81,17 @@ using (var scope = app.Services.CreateScope())
     var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
     var pendingMigrations = context.Database.GetPendingMigrations().ToList();
 
-    if (!appliedMigrations.Any())
-    {
-        context.Database.Migrate();
-    }
-    else if (pendingMigrations.Any())
-    {
-        foreach (var migration in pendingMigrations)
-        {
-            migrator.Migrate(migration);
-        }
-    }
+    //if (!appliedMigrations.Any())
+    //{
+    //    context.Database.Migrate();
+    //}
+    //else if (pendingMigrations.Any())
+    //{
+    //    foreach (var migration in pendingMigrations)
+    //    {
+    //        migrator.Migrate(migration);
+    //    }
+    //}
 
     var categoryInitializer = new CategoryInitializer(context);
     categoryInitializer.InitializeCategories();

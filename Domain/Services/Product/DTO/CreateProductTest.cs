@@ -10,9 +10,9 @@ namespace Domain.Services.Product.DTO
 {
     public class CreateProductTest
     {
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
 
-        public string Description { get; set; } = string.Empty;
+        public string Description { get; set; }
 
         public decimal DollarPrice { get; set; }
 
@@ -20,16 +20,16 @@ namespace Domain.Services.Product.DTO
         
         public int MainImageIndex { get; set; } = 0;
 
-        public Guid BrandId { get; set; } = Guid.Empty;
+        public Guid BrandId { get; set; }
 
-        public Guid ColorId { get; set; } = Guid.Empty;
+        public Guid ColorId { get; set; }
 
-        public Guid? ProductSizeId { get; set; } = Guid.Empty;
+        public Guid? ProductSizeId { get; set; }
 
-        public Guid CategoryId { get; set; } = Guid.Empty;
+        public Guid CategoryId { get; set; }
 
-        public Guid ForWhomId { get; set; } = Guid.Empty;
+        public Guid ForWhomId { get; set; }
 
-        public Guid ProductConditionId { get; set; } = Guid.Empty;
+        public Guid ProductConditionId { get; set; }
     }
 }
