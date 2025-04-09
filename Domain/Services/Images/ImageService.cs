@@ -39,15 +39,15 @@ namespace Domain.Services.Images
             return urlsList;
         }
 
-        public async Task<string> UploadImageAsync(IFormFile imageFile)
+        public async Task<string> UploadImageAsync(IFormFile file)
         {
-            var validationResult = await _fileValidator.ValidateAsync(imageFile);
+            var validationResult = await _fileValidator.ValidateAsync(file);
             if (validationResult.IsValid)
             {
                 string path = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot", "images");
-                var compressedContent = await CompressImage(imageFile);
+                var compressedContent = await CompressImage(file);
                 Directory.CreateDirectory(path);
-                var uniqueFileName = GenerateUniqueImageName(imageFile.FileName);
+                var uniqueFileName = GenerateUniqueImageName(file.FileName);
                 var filePath = Path.Combine(path, uniqueFileName);
                 await File.WriteAllBytesAsync(filePath, compressedContent);
                 return filePath;
@@ -72,7 +72,7 @@ namespace Domain.Services.Images
         private string GenerateUniqueImageName(string fileName)
         {
             var fileExtension = Path.GetExtension(fileName);
-            string newFileName = Guid.NewGuid().ToString("N");//DateTime.Now.ToString("yyyyMMddHHmmss");
+            string newFileName = Guid.NewGuid().ToString("N");
             var uniqueFileName = newFileName + fileExtension;
             return uniqueFileName;
         }

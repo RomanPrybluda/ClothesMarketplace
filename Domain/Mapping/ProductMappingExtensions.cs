@@ -25,24 +25,5 @@ namespace Domain.Mapping
                 ProductConditionId = request.ProductConditionId
             };
        }
-
-       public static ProductDetailsDto ToProductDetailsDto(this Product product)
-        {
-            return new ProductDetailsDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                DollarPrice = product.DollarPrice,
-                LikesCount = product.LikesCount,
-                Images = product.Images.Select(i => new ImageDto() {Url=i.ImageUrl, IsMain = i.IsMain }).ToList(),
-                Brand = product.Brand.Name,
-                Color = product.Color.Name,
-                ProductSize = product.ProductSize.Value,
-                Category = product.Category.Name,
-                ForWhom = product.ForWhom.Name,
-                ProductCondition = product.ProductCondition.Name
-            };
-        }
     }
 }
