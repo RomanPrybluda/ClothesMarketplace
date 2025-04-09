@@ -29,9 +29,6 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string is not set. Check environment variables, appsettings.json, or secrets.");
 }
 
-
-builder.Services.AddAutoMapper(typeof(ProductCreationProfileMap).Assembly);
-
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
@@ -42,6 +39,8 @@ builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.WriteIndented = true;
 });
 
 builder.Services.AddSwaggerGen(options =>

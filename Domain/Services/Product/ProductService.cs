@@ -1,7 +1,7 @@
-﻿using AutoMapper;
-using Azure.Core;
+﻿using Azure.Core;
 using DAL;
 using Domain.Abstractions;
+using Domain.Mapping;
 using Domain.Services.Product.DTO;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -13,16 +13,13 @@ namespace Domain
     {
         private readonly ClothesMarketplaceDbContext _context;
         private readonly IValidator<CreateProductTest> _createProductValidator;
-        private readonly IMapper _mapper;
         private readonly IImageService _imageService;
 
         public ProductService(ClothesMarketplaceDbContext context,
-            IValidator<CreateProductTest> createProductValidator,
-            IMapper mapper, IImageService imageService)
+            IValidator<CreateProductTest> createProductValidator, IImageService imageService)
         {
             _context = context;
             _createProductValidator = createProductValidator;
-            _mapper = mapper;
             _imageService = imageService;
         }
 
@@ -100,18 +97,36 @@ namespace Domain
             return ProductByIdDTO.FromProduct(productById);
         }
 
-        public async Task<Product> CreateProductAsync(CreateProductTest request)
+        public async Task<ProductDetailsDto> CreateProductAsync(CreateProductTest request)
         {
             var validationResult = await _createProductValidator.ValidateAsync(request);
             if (validationResult.IsValid)
             {
-                var product = _mapper.Map<Product>(request);
+                var product = ProductMappingExtensions.ToProduct(request);
+                product.Id = Guid.NewGuid();
                 var imagesUrls = await _imageService.UploadMultipleImagesAsync(request.Images);
                 AttachProductImages(product, imagesUrls, request.MainImageIndex);
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
+                var createdProduct = _context.Products.Where(p => p.Id == product.Id)
+                    .Select(p => new ProductDetailsDto()
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                        DollarPrice = p.DollarPrice,
+                        LikesCount = p.LikesCount,
+                        Images = p.Images.Select(i => new ImageDto() { Url = i.ImageUrl, IsMain = i.IsMain }).ToList(),
+                        Brand = p.Brand.Name,
+                        Color = p.Color.Name,
+                        ProductSize = p.ProductSize.Value,
+                        Category = p.Category.Name,
+                        ForWhom = p.ForWhom.Name,
+                        ProductCondition = p.ProductCondition.Name
+                    })
+                    .FirstOrDefault();
 
-                return product;
+                return createdProduct;
             }
 
             // TODO: Temporary stub – returns deafult value for product if it is invalid
@@ -168,10 +183,9 @@ namespace Domain
             for (int i = 0; i < imagesUrls.Count; i++)
             {
                 if (i == mainImageIndex)
-                {
                     product.Images.Add(new ProductImage { ImageUrl = imagesUrls[i], IsMain = true });
-                }
-                product.Images.Add(new ProductImage { ImageUrl = imagesUrls[i], IsMain = false });
+                else
+                    product.Images.Add(new ProductImage { ImageUrl = imagesUrls[i], IsMain = false });
             }
         }
     }

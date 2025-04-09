@@ -72,7 +72,7 @@ namespace Domain.Services.Images
         private string GenerateUniqueImageName(string fileName)
         {
             var fileExtension = Path.GetExtension(fileName);
-            string newFileName = DateTime.Now.ToString("yyyyMMddHHmmss");
+            string newFileName = Guid.NewGuid().ToString("N");//DateTime.Now.ToString("yyyyMMddHHmmss");
             var uniqueFileName = newFileName + fileExtension;
             return uniqueFileName;
         }
