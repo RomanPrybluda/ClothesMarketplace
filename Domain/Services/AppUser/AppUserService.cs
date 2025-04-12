@@ -2,21 +2,19 @@ using DAL;
 using Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 public class AppUserService
 {
-    private readonly UserManager<AppUser> _userManager;
+    private readonly ClothesMarketplaceDbContext _context;
 
-    public AppUserService(UserManager<AppUser> userManager)
+    public AppUserService(ClothesMarketplaceDbContext context)
     {
-        _userManager = userManager;
+        _context = context;
     }
 
     public async Task<PagedResult<AppUserDTO>> GetAllUsersAsync(int page, int pageSize)
     {
-        var query = _userManager.Users.Select(u => new AppUserDTO
+        var query = _context.Users.Select(u => new AppUserDTO
         {
             Id = u.Id,
             UserName = u.UserName,
@@ -31,58 +29,71 @@ public class AppUserService
 
     public async Task<AppUserDTO?> GetUserByIdAsync(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
-        return user is not null ? new AppUserDTO
-        { 
-            Id = user.Id, 
-            UserName = user.UserName,
-            Email = user.Email 
-        } : null;
+        var userById = await _context.AppUsers.FindAsync(id);
+        if (userById == null)
+            throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
+
+        var userDTO = AppUserDTO.FromAppUser(userById);
+
+        return userDTO;
     }
     
-    public async Task<AppUserDTO?> GetUserByUserNameAsync(string userName)
+    public async Task<AppUserDTO?> GetUserByNameAsync(string userName)
     {
-        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == userName);
-        return user is not null ? new AppUserDTO
-        { 
-            Id = user.Id, 
-            UserName = user.UserName,
-            Email = user.Email 
-        } : null;
+        var userByName = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+        if (userByName == null)
+            throw new CustomException(CustomExceptionType.NotFound, $"No user found with username {userName}");
+        
+        var userDTO = AppUserDTO.FromAppUser(userByName);
+
+        return userDTO;
     }
 
-    public async Task<AppUserDTO?> UpdateUserAsync(string id, UpdateUserDTO request)
+    public async Task<AppUserDTO> CreateCategoryAsync(CreateAppUserDTO request)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var existingAppUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.UserName == request.UserName);
+
+        if (existingAppUser != null)
+            throw new CustomException(CustomExceptionType.IsAlreadyExists, $"User '{request.UserName}' already exists.");
+        
+        var user = CreateAppUserDTO.ToAppUser(request);
+        
+        _context.AppUsers.Add(user);
+        await _context.SaveChangesAsync();
+        
+        var newAppUser = await _context.AppUsers.FindAsync(user.Id);
+        var userDTO  = AppUserDTO.FromAppUser(newAppUser);
+
+        return userDTO;
+    }
+
+    public async Task<AppUserDTO?> UpdateUserAsync(string id, UpdateAppUserDTO request)
+    {
+        var user = await _context.AppUsers.FindAsync(id);
 
         if (user == null)
         {
-            return null;
+           throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
         }
-        request.UpdateUser(user);
+        request.UpdateAppUser(user);
 
-        var result = await _userManager.UpdateAsync(user);
-        if (!result.Succeeded)
-        {
-            return null;
-        }
-        return new AppUserDTO
-        {
-            Id = user.Id,
-            UserName = user.UserName,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Email = user.Email
-        };
+        _context.AppUsers.Update(user);
+        await _context.SaveChangesAsync();
+
+        var userDTO = AppUserDTO.FromAppUser(user);
+
+        return userDTO;
     }
-
-
+     
     public async Task DeleteUserAsync(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
-        if (user is not null)
+        var user = await _context.AppUsers.FindAsync(id);
+        if (user == null)
         {
-            await _userManager.DeleteAsync(user);
+            throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
         }
+        
+        _context.AppUsers.Remove(user);
+        await _context.SaveChangesAsync();
     }
 }

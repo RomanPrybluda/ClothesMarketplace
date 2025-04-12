@@ -3,66 +3,77 @@ using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
-[Route("AppUser")]
 [ApiController]
+[Produces("application/json")]
+[Route("AppUser")]
 public class AppUserController : ControllerBase
 {
     private readonly AppUserService _userService;
-    private readonly UserManager<AppUser> _userManager;
 
-    public AppUserController(AppUserService userService, UserManager<AppUser> userManager)
+    public AppUserController(AppUserService userService)
     {
         _userService = userService;
-        _userManager = userManager;
     }
 
     [HttpGet("{id}")]
-    [Authorize(Roles = "User")]
-    public async Task<ActionResult<AppUser>> GetUser(string id)
+//    [Authorize]
+    public async Task<ActionResult<AppUser>> GetUser([Required] string id)
     {
-        if (User.Identity != null && User.Identity.IsAuthenticated)
-        {
-            if (User.IsInRole("Admin") || User.Identity.Name == id)
-            {
-                var user = await _userService.GetUserByIdAsync(id);
-                return user == null ? NotFound() : Ok(user);
-            }
-        }
-        return Unauthorized();
+/*        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userId == null)
+            return Unauthorized("User ID not found, please authorized.");
+*/
+    
+        var userDTO = await _userService.GetUserByIdAsync(id);
+        if (userDTO == null)
+                return NotFound($"No user found with ID {id}");
+
+        return Ok(userDTO);
     }
     
     [HttpGet("{userName}")]
-    [Authorize(Roles = "User")]
-    public async Task<ActionResult<AppUser>> GetUserByName(string userName)
+ //   [Authorize]
+    public async Task<ActionResult<AppUser>> GetUserByName([Required] string userName)
     {
-        if (User.Identity != null && User.Identity.IsAuthenticated)
+ /*       var currentUserName = User.Identity?.Name;
+
+        if (currentUserName != userName)
         {
-            if (User.IsInRole("Admin") || User.Identity.Name == userName)
-            {
-                var user = await _userService.GetUserByUserNameAsync(userName);
-                return user == null ? NotFound() : Ok(user);
-            }
+            return Forbid();        
         }
-        return Unauthorized();
+*/
+        var userDTO = await _userService.GetUserByNameAsync(userName);
+        if (userDTO == null)
+            return NotFound($"No user found with username {userName}");
+
+        return Ok(userDTO);
     }
 
+    
+    
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDTO request)
+ //   [Authorize]
+    public async Task<ActionResult> UpdateUserAsync(string id, [FromBody][Required] UpdateAppUserDTO request)
     {
-        if (request == null)
-        {
-            return BadRequest("Invalid request data");
-        }
+/*        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        var updatedUser = await _userService.UpdateUserAsync(id, request);
-        
-        if (updatedUser == null)
+        if(userId != id)
         {
-            return NotFound("User not found or update failed");
+            return Forbid();
         }
+ */           
+        var updatedUserDTO = await _userService.UpdateUserAsync(id, request);
 
-        return Ok(updatedUser);
+        if(updatedUserDTO == null)
+        {
+            return NotFound($"No user found with ID {id}");
+        }
+            
+        return Ok(updatedUserDTO);
     }
 }

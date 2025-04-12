@@ -1,13 +1,15 @@
 using DAL;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-[Route("Admin")]
 [ApiController]
-[Authorize(Roles = "Admin")]
+[Produces("application/json")]
+[Route("Admin")]
+//[Authorize(Roles = "Admin")]
 public class AdminController : ControllerBase
 {
     private readonly AppUserService _userService;
@@ -24,20 +26,20 @@ public class AdminController : ControllerBase
         return Ok(users);
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteUser(string id)
+    [HttpDelete("user/{id}")]
+    public async Task<IActionResult> DeleteUser([Required] string id)
     {
         var user = await _userService.GetUserByIdAsync(id); 
         if (user is null)
-            return NotFound(new { Message = $"Користувача з ID {id} не знайдено" });
+            return NotFound(new { Message = $"No user found with ID {id}" });
 
         await _userService.DeleteUserAsync(id);
         return NoContent();
     }
 
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<AppUser>> GetUser(string id)
+    [HttpGet("user/{id}")]
+    public async Task<ActionResult<AppUser>> GetUser([Required] string id)
     {
         var user = await _userService.GetUserByIdAsync(id);
         return user == null ? NotFound() : Ok(user);
