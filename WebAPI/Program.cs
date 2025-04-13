@@ -1,10 +1,17 @@
 using DAL;
 using Domain;
+using Domain.Abstractions;
+using Domain.Helpers;
+using Domain.Services.Images;
+using Domain.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System.Text.Json.Serialization;
+using Domain.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,13 +31,22 @@ if (string.IsNullOrWhiteSpace(connectionString))
 
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.WriteIndented = true;
 });
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.MapType<IFormFile>(() => new OpenApiSchema { Type = "string", Format = "binary" });
+});
 
 builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
 {
@@ -64,17 +80,17 @@ using (var scope = app.Services.CreateScope())
     var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
     var pendingMigrations = context.Database.GetPendingMigrations().ToList();
 
-    if (!appliedMigrations.Any())
-    {
-        context.Database.Migrate();
-    }
-    else if (pendingMigrations.Any())
-    {
-        foreach (var migration in pendingMigrations)
-        {
-            migrator.Migrate(migration);
-        }
-    }
+    //if (!appliedMigrations.Any())
+    //{
+    //    context.Database.Migrate();
+    //}
+    //else if (pendingMigrations.Any())
+    //{
+    //    foreach (var migration in pendingMigrations)
+    //    {
+    //        migrator.Migrate(migration);
+    //    }
+    //}
 
     var categoryInitializer = new CategoryInitializer(context);
     categoryInitializer.InitializeCategories();

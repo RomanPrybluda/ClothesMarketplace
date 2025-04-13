@@ -1,16 +1,26 @@
-﻿using DAL;
+﻿using Azure.Core;
+using DAL;
+using Domain.Abstractions;
+using Domain.Mapping;
+using Domain.Services.Product.DTO;
+using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain
 {
     public class ProductService
     {
-
         private readonly ClothesMarketplaceDbContext _context;
+        private readonly IValidator<CreateProductTest> _createProductValidator;
+        private readonly IImageService _imageService;
 
-        public ProductService(ClothesMarketplaceDbContext context)
+        public ProductService(ClothesMarketplaceDbContext context,
+            IValidator<CreateProductTest> createProductValidator, IImageService imageService)
         {
             _context = context;
+            _createProductValidator = createProductValidator;
+            _imageService = imageService;
         }
 
         public async Task<PagedResponseDTO<ProductDTO>> GetProductsListAsync(ProductFilterDTO filter)
@@ -79,7 +89,6 @@ namespace Domain
             );
         }
 
-
         public async Task<ProductByIdDTO> GetProductByIdAsync(Guid id)
         {
             var productById = await _context.Products.FindAsync(id)
@@ -88,23 +97,40 @@ namespace Domain
             return ProductByIdDTO.FromProduct(productById);
         }
 
-        public async Task<ProductDTO> CreateProductAsync(CreateProductDTO request)
+        public async Task<ProductDetailsDto> CreateProductAsync(CreateProductTest request)
         {
-            var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name);
-            if (existingProduct != null)
-                throw new CustomException(CustomExceptionType.ProductAlreadyExists, $"Product with Name {request.Name} already exists.");
+            var validationResult = await _createProductValidator.ValidateAsync(request);
+            if (validationResult.IsValid)
+            {
+                var product = ProductMappingExtensions.ToProduct(request);
+                product.Id = Guid.NewGuid();
+                var imagesUrls = await _imageService.UploadMultipleImagesAsync(request.Images);
+                AttachProductImages(product, imagesUrls, request.MainImageIndex);
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
+                var createdProduct = _context.Products.Where(p => p.Id == product.Id)
+                    .Select(p => new ProductDetailsDto()
+                    {
+                        Id = p.Id,
+                        Name = p.Name,
+                        Description = p.Description,
+                        DollarPrice = p.DollarPrice,
+                        LikesCount = p.LikesCount,
+                        Images = p.Images.Select(i => new ImageDto() { Url = i.ImageUrl, IsMain = i.IsMain }).ToList(),
+                        Brand = p.Brand.Name,
+                        Color = p.Color.Name,
+                        ProductSize = p.ProductSize.Value,
+                        Category = p.Category.Name,
+                        ForWhom = p.ForWhom.Name,
+                        ProductCondition = p.ProductCondition.Name
+                    })
+                    .FirstOrDefault();
 
-            var category = await _context.Categories.FindAsync(request.CategoryId)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"No category found with ID {request.CategoryId}");
+                return createdProduct;
+            }
 
-            ValidateImages(request.Images.Select(img => img.ImageUrl));
-
-
-            var product = CreateProductDTO.ToProduct(request);
-            _context.Products.Add(product);
-            await _context.SaveChangesAsync();
-
-            return ProductDTO.FromProduct(product);
+            // TODO: Temporary stub – returns deafult value for product if it is invalid
+            return default;
         }
 
         public async Task<ProductDTO> UpdateProductAsync(Guid id, UpdateProductDTO request)
@@ -151,5 +177,17 @@ namespace Domain
                 }
             }
         }
+
+        private void AttachProductImages(Product product, List<string> imagesUrls, int mainImageIndex)
+        {
+            for (int i = 0; i < imagesUrls.Count; i++)
+            {
+                if (i == mainImageIndex)
+                    product.Images.Add(new ProductImage { ImageUrl = imagesUrls[i], IsMain = true });
+                else
+                    product.Images.Add(new ProductImage { ImageUrl = imagesUrls[i], IsMain = false });
+            }
+        }
     }
 }
+
