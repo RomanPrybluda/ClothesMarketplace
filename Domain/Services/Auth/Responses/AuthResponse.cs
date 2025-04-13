@@ -1,4 +1,4 @@
-﻿namespace Domain.Services.Auth.Responses;
+﻿namespace Domain;
 
 public class AuthResponse
 {

@@ -1,11 +1,9 @@
 ﻿using DAL;
-using Domain.Services.Auth.Login.DTO;
-using Domain.Services.Auth.Responses;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Domain.Services.Auth.ExtraServices;
 
-namespace Domain.Services.Auth.Login;
+namespace Domain;
 
 public class AuthService(
     UserManager<AppUser> _userManager,

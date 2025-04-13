@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Domain.Services.Auth.Login.DTO;
+﻿using Domain;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Domain.Services.Auth.Login;
-using DAL;
+using System.ComponentModel.DataAnnotations;
 
-namespace WebAPI.Controllers
+namespace WebAPI
 {
     [Route("/auth")]
     [ApiController]

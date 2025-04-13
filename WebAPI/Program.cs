@@ -6,7 +6,6 @@ using System.Text.Json.Serialization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Domain.Services.Auth.Login;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using Domain;
