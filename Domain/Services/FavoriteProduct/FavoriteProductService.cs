@@ -55,7 +55,7 @@ namespace Domain
             }
         }
 
-        public async Task<List<Product>> GetFavoriteProductsAsync(Guid userId)
+        public async Task<List<Guid>> GetFavoriteProductsAsync(Guid userId)
         {
             var user = await _context.Users
                 .Include(u => u.FavoriteProducts)
@@ -63,7 +63,7 @@ namespace Domain
             if (user == null)
                 throw new CustomException(CustomExceptionType.NotFound, $"User with ID {userId} not found.");
 
-            var favoriteProducts = user.FavoriteProducts;
+            var favoriteProducts = user.FavoriteProducts.Select(p => p.Id).ToList();
 
             return favoriteProducts;
         }

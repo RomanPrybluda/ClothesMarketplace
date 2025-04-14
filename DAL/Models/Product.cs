@@ -50,6 +50,6 @@
 
         public AppUser? Buyer { get; set; }
 
-        public List<AppUser> FavoritedByUsers { get; set; } = new();
+        public ICollection<AppUser> FavoritedByUsers { get; set; } = new List<AppUser>();
     }
 }

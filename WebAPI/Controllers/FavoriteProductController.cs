@@ -33,7 +33,7 @@ namespace WebAPI
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetFavorites([FromForm][Required] Guid userId)
+        public async Task<ActionResult> GetFavorites([FromQuery][Required] Guid userId)
         {
             var favoriteProducts = await _favoriteProductService.GetFavoriteProductsAsync(userId);
             return Ok(favoriteProducts);

@@ -8,6 +8,7 @@ namespace DAL
         public void Configure(EntityTypeBuilder<Product> builder)
         {
             builder.HasKey(p => p.Id);
+
             builder.Property(p => p.Id)
                 .HasDefaultValueSql("NEWID()")
                 .ValueGeneratedOnAdd();
@@ -77,6 +78,11 @@ namespace DAL
                 .WithOne(pi => pi.Product)
                 .HasForeignKey(pi => pi.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder
+                .HasMany(p => p.FavoritedByUsers)
+                .WithMany(u => u.FavoriteProducts)
+                .UsingEntity(j => j.ToTable("FavoriteProducts"));
         }
     }
 }

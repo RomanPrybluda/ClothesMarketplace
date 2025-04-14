@@ -4,7 +4,7 @@ namespace DAL
 {
     public class AppUser : IdentityUser
     {
-        public string? UserName { get; set; }
+
         public string? FirstName { get; set; }
 
         public string? LastName { get; set; }
@@ -15,10 +15,10 @@ namespace DAL
 
         public DateTime RefreshTokenExpiryTime { get; set; }
 
-        public List<Product> PurchasedProducts { get; set; } = new();
+        public ICollection<Product> SoldProducts { get; set; } = new List<Product>();
 
-        public List<Product> SoldProducts { get; set; } = new();
+        public ICollection<Product> PurchasedProducts { get; set; } = new List<Product>();
 
-        public List<Product> FavoriteProducts { get; set; } = new();
+        public ICollection<Product> FavoriteProducts { get; set; } = new List<Product>();
     }
 }
