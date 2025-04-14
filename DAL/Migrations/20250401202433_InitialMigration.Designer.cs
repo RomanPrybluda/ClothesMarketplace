@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ClothesMarketplaceDbContext))]
-    [Migration("20250402193313__new")]
-    partial class _new
+    [Migration("20250401202433_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -211,9 +211,6 @@ namespace DAL.Migrations
                     b.Property<string>("BuyerId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("BuyerId1")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
@@ -254,16 +251,11 @@ namespace DAL.Migrations
                     b.Property<string>("SellerId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("SellerId1")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("BrandId");
 
                     b.HasIndex("BuyerId");
-
-                    b.HasIndex("BuyerId1");
 
                     b.HasIndex("CategoryId");
 
@@ -280,8 +272,6 @@ namespace DAL.Migrations
                     b.HasIndex("ProductSizeId");
 
                     b.HasIndex("SellerId");
-
-                    b.HasIndex("SellerId1");
 
                     b.ToTable("Products");
                 });
@@ -534,14 +524,10 @@ namespace DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("DAL.AppUser", null)
+                    b.HasOne("DAL.AppUser", "Buyer")
                         .WithMany("PurchasedProducts")
                         .HasForeignKey("BuyerId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("DAL.AppUser", "Buyer")
-                        .WithMany()
-                        .HasForeignKey("BuyerId1");
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("DAL.Category", "Category")
                         .WithMany("Products")
@@ -577,14 +563,10 @@ namespace DAL.Migrations
                         .HasForeignKey("ProductSizeId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("DAL.AppUser", null)
+                    b.HasOne("DAL.AppUser", "Seller")
                         .WithMany("SoldProducts")
                         .HasForeignKey("SellerId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("DAL.AppUser", "Seller")
-                        .WithMany()
-                        .HasForeignKey("SellerId1");
 
                     b.Navigation("Brand");
 
