@@ -31,6 +31,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<AppUserService>();
+builder.Services.AddScoped<FavoriteProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 
