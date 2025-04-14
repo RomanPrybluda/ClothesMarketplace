@@ -1,9 +1,15 @@
 using DAL;
 using Domain;
+using Domain.Abstractions;
+using Domain.Helpers;
+using Domain.Services.Images;
+using Domain.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,10 +31,16 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<AppUserService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+    options.JsonSerializerOptions.WriteIndented = true;
 });
 
 builder.Services.AddSwaggerGen(c =>
@@ -54,7 +66,9 @@ builder.Services.AddSwaggerGen(c =>
             new List<string>()
         }
     });
+    c.MapType<IFormFile>(() => new OpenApiSchema { Type = "string", Format = "binary" });
 });
+
 
 builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
 {
@@ -89,9 +103,9 @@ using (var scope = app.Services.CreateScope())
     var pendingMigrations = context.Database.GetPendingMigrations().ToList();
 
     if (!appliedMigrations.Any())
-    {
+
         context.Database.Migrate();
-    }
+
     else if (pendingMigrations.Any())
     {
         foreach (var migration in pendingMigrations)
@@ -141,6 +155,8 @@ app.UseSwaggerUI();
 //}
 
 app.UseCors("AllowAll");
+
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
