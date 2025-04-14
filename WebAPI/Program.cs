@@ -7,11 +7,10 @@ using Domain.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.OpenApi.Models;
 using System.Text.Json.Serialization;
-using Domain.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +30,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
 
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<AppUserService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 
@@ -43,10 +43,32 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.WriteIndented = true;
 });
 
-builder.Services.AddSwaggerGen(options =>
+builder.Services.AddSwaggerGen(c =>
 {
-    options.MapType<IFormFile>(() => new OpenApiSchema { Type = "string", Format = "binary" });
+    c.AddSecurityDefinition("APIKey", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey
+    });
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "APIKey"
+                }
+            },
+            new List<string>()
+        }
+    });
+    c.MapType<IFormFile>(() => new OpenApiSchema { Type = "string", Format = "binary" });
 });
+
 
 builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
 {
@@ -80,17 +102,17 @@ using (var scope = app.Services.CreateScope())
     var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
     var pendingMigrations = context.Database.GetPendingMigrations().ToList();
 
-    //if (!appliedMigrations.Any())
-    //{
-    //    context.Database.Migrate();
-    //}
-    //else if (pendingMigrations.Any())
-    //{
-    //    foreach (var migration in pendingMigrations)
-    //    {
-    //        migrator.Migrate(migration);
-    //    }
-    //}
+    if (!appliedMigrations.Any())
+
+        context.Database.Migrate();
+
+    else if (pendingMigrations.Any())
+    {
+        foreach (var migration in pendingMigrations)
+        {
+            migrator.Migrate(migration);
+        }
+    }
 
     var categoryInitializer = new CategoryInitializer(context);
     categoryInitializer.InitializeCategories();
@@ -118,6 +140,9 @@ using (var scope = app.Services.CreateScope())
 
     var appUserInitializer = new AppUserInitializer(userManager);
     appUserInitializer.InitializeAppUsers();
+
+    var adminInitializer = new AdminInitializer(userManager, roleManager);
+    await adminInitializer.InitializeAdmin();
 
     var productInitializer = new ProductInitializer(context);
     productInitializer.InitializeProducts();
