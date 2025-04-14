@@ -29,5 +29,10 @@ public class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
             .WithOne(p => p.Buyer)
             .HasForeignKey(p => p.BuyerId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder
+            .HasMany(u => u.FavoriteProducts)
+            .WithMany(p => p.FavoritedByUsers)
+            .UsingEntity(j => j.ToTable("FavoriteProducts"));
     }
 }
