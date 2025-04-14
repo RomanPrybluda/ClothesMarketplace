@@ -18,5 +18,7 @@ namespace DAL
         public List<Product> PurchasedProducts { get; set; } = new();
 
         public List<Product> SoldProducts { get; set; } = new();
+
+        public List<Product> FavoriteProducts { get; set; } = new();
     }
 }

@@ -49,5 +49,7 @@
         public string? BuyerId { get; set; }
 
         public AppUser? Buyer { get; set; }
+
+        public List<AppUser> FavoritedByUsers { get; set; } = new();
     }
 }
