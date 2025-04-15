@@ -1,4 +1,5 @@
 ﻿using Domain.Abstractions;
+using Domain.Helpers;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Routing;
@@ -49,7 +50,8 @@ namespace Domain.Services.Images
                 Directory.CreateDirectory(path);
                 var uniqueFileName = GenerateUniqueImageName(file.FileName);
                 var filePath = Path.Combine(path, uniqueFileName);
-                await File.WriteAllBytesAsync(filePath, compressedContent);
+                var webpImage = ImageConverter.ConvertToWebpImageFormat(compressedContent);
+                await File.WriteAllBytesAsync(filePath, webpImage);
                 return filePath;
             }
             else
@@ -65,13 +67,17 @@ namespace Domain.Services.Images
             using var image = await Image.LoadAsync(imageStream);
             using var memoryStream = new MemoryStream();
             var encoder = _encoderFactory.GetEncoder(imageFile);
+            image.Metadata.IptcProfile = null;
+            image.Metadata.XmpProfile = null;
+            image.Metadata.IccProfile = null;
+            image.Metadata.CicpProfile = null;
             await image.SaveAsync(memoryStream, encoder);
             return memoryStream.ToArray();
         }
 
         private string GenerateUniqueImageName(string fileName)
         {
-            var fileExtension = Path.GetExtension(fileName);
+            var fileExtension = ".webp";
             string newFileName = Guid.NewGuid().ToString("N");
             var uniqueFileName = newFileName + fileExtension;
             return uniqueFileName;

@@ -23,7 +23,7 @@ namespace Domain.Helpers
                 ".jpg" => new JpegEncoder { Quality = 75},
                 ".jpeg" => new JpegEncoder { Quality = 75},
                 ".png" => new PngEncoder { CompressionLevel = PngCompressionLevel.BestCompression},
-                ".webp" => new WebpEncoder { Quality = 60},
+                ".webp" => new WebpEncoder(),
                 _ => throw new NotSupportedImageFormatException($"Unsupported image format: {extension}")
             };
         }
