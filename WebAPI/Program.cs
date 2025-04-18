@@ -159,6 +159,7 @@ builder.Services.AddScoped<FavoriteProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
 builder.Logging.AddConsole();

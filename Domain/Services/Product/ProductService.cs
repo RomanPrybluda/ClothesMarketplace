@@ -8,13 +8,16 @@ namespace Domain
     public class ProductService
     {
         private readonly ClothesMarketplaceDbContext _context;
+        private readonly IValidator<CreateProductDTO> _createProductValidator;
         private readonly IImageService _imageService;
 
         public ProductService(ClothesMarketplaceDbContext context,
-            IImageService imageService)
+            IImageService imageService,
+            IValidator<CreateProductDTO> createProductValidator)
         {
             _context = context;
             _imageService = imageService;
+            _createProductValidator = createProductValidator;
         }
 
         public async Task<PagedResponseDTO<ProductDTO>> GetProductsListAsync(ProductFilterDTO filter)
@@ -97,23 +100,7 @@ namespace Domain
             var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name)
                 ?? throw new CustomException(CustomExceptionType.ProductAlreadyExists, $"Product with name {request.Name} already exists.");
 
-            var brand = await _context.Brands.FindAsync(request.BrandId)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"Brand not found with ID {request.CategoryId}");
-
-            var color = await _context.Colors.FindAsync(request.ColorId)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"Color not found with ID {request.CategoryId}");
-
-            var productSize = await _context.ProductSizes.FindAsync(request.ProductSizeId)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"Product size not found with ID {request.CategoryId}");
-
-            var category = await _context.Categories.FindAsync(request.CategoryId)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"Category not found with ID {request.CategoryId}");
-
-            var forWhom = await _context.ForWhoms.FindAsync(request.ForWhomId)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"For whom not found with ID {request.CategoryId}");
-
-            var ProductCondition = await _context.ProductConditions.FindAsync(request.ProductConditionId)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"Product condition not found with ID {request.CategoryId}");
+            var validationResult = await _createProductValidator.ValidateAsync(request);
 
             var product = CreateProductDTO.ToProduct(request);
 
