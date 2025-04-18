@@ -1,15 +1,14 @@
 using DAL;
 using Domain;
 using Microsoft.AspNetCore.Authorization;
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 [ApiController]
 [Produces("application/json")]
-[Route("Admin")]
-//[Authorize(Roles = "Admin")]
+[Route("admin/users")]
+[Authorize]
+
 public class AdminController : ControllerBase
 {
     private readonly AppUserService _userService;
@@ -19,29 +18,25 @@ public class AdminController : ControllerBase
         _userService = userService;
     }
 
-    [HttpGet("users")]
+    [HttpGet]
     public async Task<ActionResult<PagedResult<AppUserDTO>>> GetUsers([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         var users = await _userService.GetAllUsersAsync(page, pageSize);
         return Ok(users);
     }
 
-    [HttpDelete("user/{id}")]
-    public async Task<IActionResult> DeleteUser([Required] string id)
+    [HttpDelete("{id:Guid}")]
+    public async Task<IActionResult> DeleteUser([Required] Guid id)
     {
-        var user = await _userService.GetUserByIdAsync(id); 
-        if (user is null)
-            return NotFound(new { Message = $"No user found with ID {id}" });
-
-        await _userService.DeleteUserAsync(id);
+        await _userService.GetUserByIdAsync(id);
         return NoContent();
     }
 
 
-    [HttpGet("user/{id}")]
-    public async Task<ActionResult<AppUser>> GetUser([Required] string id)
+    [HttpGet("{id:Guid}")]
+    public async Task<ActionResult<AppUser>> GetUser([Required] Guid id)
     {
         var user = await _userService.GetUserByIdAsync(id);
-        return user == null ? NotFound() : Ok(user);
+        return Ok(user);
     }
 }

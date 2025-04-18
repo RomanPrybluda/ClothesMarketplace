@@ -2,11 +2,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace WebAPI
 {
-    [Route("/auth")]
+    [Route("auth")]
     [ApiController]
+
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
@@ -38,13 +40,17 @@ namespace WebAPI
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
-            var userId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            if (userId == null) return Unauthorized();
 
-            await _authService.LogoutAsync(userId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var guid))
+                return Unauthorized();
+
+            await _authService.LogoutAsync(guid.ToString());
             return Ok(new { message = "Logged out successfully" });
         }
 
+        [AllowAnonymous]
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken([FromBody][Required] string refreshToken)
         {
@@ -53,6 +59,7 @@ namespace WebAPI
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody][Required] ForgotPasswordDTO request)
         {

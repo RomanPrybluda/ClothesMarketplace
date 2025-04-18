@@ -1,6 +1,5 @@
 using DAL;
 using Domain;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 public class AppUserService
@@ -27,7 +26,7 @@ public class AppUserService
         return new PagedResult<AppUserDTO> { Items = users, TotalCount = totalUsers };
     }
 
-    public async Task<AppUserDTO?> GetUserByIdAsync(string id)
+    public async Task<AppUserDTO?> GetUserByIdAsync(Guid id)
     {
         var userById = await _context.AppUsers.FindAsync(id);
         if (userById == null)
@@ -37,13 +36,13 @@ public class AppUserService
 
         return userDTO;
     }
-    
+
     public async Task<AppUserDTO?> GetUserByNameAsync(string userName)
     {
         var userByName = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
         if (userByName == null)
             throw new CustomException(CustomExceptionType.NotFound, $"No user found with username {userName}");
-        
+
         var userDTO = AppUserDTO.FromAppUser(userByName);
 
         return userDTO;
@@ -55,25 +54,25 @@ public class AppUserService
 
         if (existingAppUser != null)
             throw new CustomException(CustomExceptionType.IsAlreadyExists, $"User '{request.UserName}' already exists.");
-        
+
         var user = CreateAppUserDTO.ToAppUser(request);
-        
+
         _context.AppUsers.Add(user);
         await _context.SaveChangesAsync();
-        
+
         var newAppUser = await _context.AppUsers.FindAsync(user.Id);
-        var userDTO  = AppUserDTO.FromAppUser(newAppUser);
+        var userDTO = AppUserDTO.FromAppUser(newAppUser);
 
         return userDTO;
     }
 
-    public async Task<AppUserDTO?> UpdateUserAsync(string id, UpdateAppUserDTO request)
+    public async Task<AppUserDTO?> UpdateUserAsync(Guid id, UpdateAppUserDTO request)
     {
         var user = await _context.AppUsers.FindAsync(id);
 
         if (user == null)
         {
-           throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
+            throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
         }
         request.UpdateAppUser(user);
 
@@ -84,7 +83,7 @@ public class AppUserService
 
         return userDTO;
     }
-     
+
     public async Task DeleteUserAsync(string id)
     {
         var user = await _context.AppUsers.FindAsync(id);
@@ -92,7 +91,7 @@ public class AppUserService
         {
             throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
         }
-        
+
         _context.AppUsers.Remove(user);
         await _context.SaveChangesAsync();
     }

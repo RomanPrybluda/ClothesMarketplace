@@ -1,4 +1,5 @@
 ﻿using Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -7,6 +8,7 @@ namespace WebAPI
     [ApiController]
     [Produces("application/json")]
     [Route("products")]
+    [Authorize]
 
     public class ProductController : ControllerBase
     {

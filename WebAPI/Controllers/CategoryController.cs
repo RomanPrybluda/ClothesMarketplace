@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI
 {
-    [Authorize]
     [ApiController]
     [Produces("application/json")]
     [Route("categories")]
+    [Authorize]
 
     public class CategoryController : ControllerBase
     {

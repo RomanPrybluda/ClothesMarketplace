@@ -32,21 +32,33 @@ public class AuthService(
             UserName = request.UserName,
             Email = request.Email,
             FirstName = request.FirstName,
-            LastName = request.LastName
+            LastName = request.LastName,
+            RefreshToken = _jwtService.GenerateRefreshToken(),
+            RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7) // например, 7 дней
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            return new AuthResponse { Success = false, Errors = result.Errors.Select(e => e.Description).ToList() };
+            return new AuthResponse
+            {
+                Success = false,
+                Errors = result.Errors.Select(e => e.Description).ToList()
+            };
         }
 
-        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var confirmationLink = $"https://your-app.com/confirm-email?userId={user.Id}&token={Uri.EscapeDataString(token)}";
-        await _emailService.SendEmailAsync(user.Email, "Confirm your email", $"Click here to confirm your email: {confirmationLink}");
+        var token = _jwtService.GenerateJwtToken(user);
+        await _userManager.UpdateAsync(user);
 
-        return new AuthResponse { Success = true, Message = "User registered. Please confirm your email." };
+        return new AuthResponse
+        {
+            Success = true,
+            Token = token,
+            RefreshToken = user.RefreshToken,
+            Message = "User registered successfully."
+        };
     }
+
 
     public async Task<AuthResponse> LoginAsync(LoginDTO request)
     {
@@ -61,7 +73,6 @@ public class AuthService(
                return new AuthResponse { Success = false, Message = "Email is not confirmed" };
         }  */
 
-        // Генерація JWT токену та Refresh токену
         var token = _jwtService.GenerateJwtToken(user);
         var refreshToken = _jwtService.GenerateRefreshToken();
 

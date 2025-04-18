@@ -43,6 +43,6 @@ public class JwtService(IConfiguration _configuration)
         var bytes = new byte[32];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
-        return BitConverter.ToString(bytes).Replace("-", "").ToLower(); // hex string
+        return BitConverter.ToString(bytes).Replace("-", "").ToLower();
     }
 }

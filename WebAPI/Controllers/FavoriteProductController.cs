@@ -1,4 +1,5 @@
 ﻿using Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
@@ -8,7 +9,7 @@ namespace WebAPI
     [ApiController]
     [Produces("application/json")]
     [Route("favorite-products")]
-
+    [Authorize]
     public class FavoriteProductController : ControllerBase
     {
         private readonly FavoriteProductService _favoriteProductService;

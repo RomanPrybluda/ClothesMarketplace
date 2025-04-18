@@ -38,45 +38,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1",
-        new OpenApiInfo
-        {
-            Title = "Clothes Marketplace API",
-            Version = "v1"
-        });
-
-    options.AddSecurityDefinition("Bearer",
-        new OpenApiSecurityScheme
-        {
-            Description = "JWT Authorization using Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-            Name = "Authorization",
-            In = ParameterLocation.Header,
-            Type = SecuritySchemeType.Http,
-            BearerFormat = "JWT",
-            Scheme = "Bearer"
-        });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header
-            },
-            new List<string>()
-        }
-    });
-});
-
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -86,6 +47,13 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddSwaggerGen(c =>
 {
+    c.SwaggerDoc("v1",
+    new OpenApiInfo
+    {
+        Title = "Clothes Marketplace API",
+        Version = "v1"
+    });
+
     c.AddSecurityDefinition("APIKey", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
@@ -93,6 +61,7 @@ builder.Services.AddSwaggerGen(c =>
         Name = "Authorization",
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey
     });
+
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
