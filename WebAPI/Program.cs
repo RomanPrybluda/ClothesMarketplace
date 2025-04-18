@@ -29,6 +29,69 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string is not set. Check environment variables, appsettings.json, or secrets.");
 }
 
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1",
+        new OpenApiInfo
+        {
+            Title = "Clothes Marketplace API",
+            Version = "v1"
+        });
+
+    options.AddSecurityDefinition("Bearer",
+        new OpenApiSecurityScheme
+        {
+            Description = "JWT Authorization using Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.Http,
+            BearerFormat = "JWT",
+            Scheme = "Bearer"
+        });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+});
+
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
+{
+    options.UseSqlServer(connectionString, b => b.MigrationsAssembly("DAL"));
+});
+
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 12;
+})
+.AddEntityFrameworkStores<ClothesMarketplaceDbContext>();
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -53,62 +116,11 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddSwaggerGen(options =>
-{
-    options.SwaggerDoc("v1",
-        new OpenApiInfo
-        {
-            Title = "Clothes Marketplace API",
-            Version = "v1"
-        });
-
-    options.AddSecurityDefinition("Bearer",
-        new OpenApiSecurityScheme
-        {
-            Description = "JWT Authorization using Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-            Name = "Authorization",
-            In = ParameterLocation.Header,
-            Type = SecuritySchemeType.Http,
-            Scheme = "Bearer"
-        });
-
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-                Scheme = "oauth2",
-                Name = "Bearer",
-                In = ParameterLocation.Header
-            },
-            new List<string>()
-        }
-    });
-});
-
-builder.Services.AddIdentity<AppUser, IdentityRole>()
-    .AddEntityFrameworkStores<ClothesMarketplaceDbContext>()
-    .AddDefaultTokenProviders();
 builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
-
-builder.Services.AddControllers().AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-});
-
-builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
-{
-    options.UseSqlServer(connectionString, b => b.MigrationsAssembly("DAL"));
-});
 
 builder.Logging.AddConsole();
 
@@ -184,9 +196,14 @@ app.UseSwaggerUI();
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
-app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
+
+app.UseCors(x => x
+     .AllowAnyMethod()
+     .AllowAnyHeader()
+     .AllowCredentials()
+     .SetIsOriginAllowed(origin => true));
 
 app.UseAuthentication();
 app.UseAuthorization();
