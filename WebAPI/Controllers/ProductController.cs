@@ -1,11 +1,11 @@
 ﻿using Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Filters;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI
 {
-
+    [Authorize]
     [ApiController]
     [Produces("application/json")]
     [Route("products")]
@@ -34,7 +34,6 @@ namespace WebAPI
         }
 
         [HttpPost]
-        [SwaggerRequestExample(typeof(CreateProductDTO), typeof(CreateProductExample))]
         public async Task<ActionResult> CreateProductAsync([FromBody][Required] CreateProductDTO request)
         {
             var product = await _productService.CreateProductAsync(request);
@@ -53,36 +52,6 @@ namespace WebAPI
         {
             await _productService.DeleteProductAsync(id);
             return NoContent();
-        }
-
-        public class CreateProductExample : IExamplesProvider<CreateProductDTO>
-        {
-            public CreateProductDTO GetExamples()
-            {
-                return new CreateProductDTO
-                {
-                    Name = "Product name",
-                    Description = "Description of product",
-                    DollarPrice = 100,
-                    Images = new List<ProductImageDTO>
-                {
-                    new ProductImageDTO { ImageUrl = "image1.jpg", IsMain = true },
-                    new ProductImageDTO { ImageUrl = "image2.jpg", IsMain = false },
-                    new ProductImageDTO { ImageUrl = "image3.jpg", IsMain = false },
-                    new ProductImageDTO { ImageUrl = "image4.jpg", IsMain = false },
-                    new ProductImageDTO { ImageUrl = "image5.jpg", IsMain = false },
-                    new ProductImageDTO { ImageUrl = "image6.jpg", IsMain = false },
-                    new ProductImageDTO { ImageUrl = "image7.jpg", IsMain = false },
-                    new ProductImageDTO { ImageUrl = "image8.jpg", IsMain = false },
-                    new ProductImageDTO { ImageUrl = "image9.jpg", IsMain = false },
-                    new ProductImageDTO { ImageUrl = "image10.jpg", IsMain = false }
-                },
-                    BrandId = Guid.NewGuid(),
-                    CategoryId = Guid.NewGuid(),
-                    ForWhomId = Guid.NewGuid(),
-                    ProductConditionId = Guid.NewGuid()
-                };
-            }
         }
 
     }

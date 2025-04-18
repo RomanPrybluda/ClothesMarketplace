@@ -1,7 +1,6 @@
 ﻿using DAL;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Domain.Services.Auth.ExtraServices;
 
 namespace Domain;
 
@@ -48,7 +47,7 @@ public class AuthService(
 
         return new AuthResponse { Success = true, Message = "User registered. Please confirm your email." };
     }
-    
+
     public async Task<AuthResponse> LoginAsync(LoginDTO request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
@@ -57,16 +56,15 @@ public class AuthService(
             return new AuthResponse { Success = false, Message = "Invalid credentials" };
         }
 
-     /*   if (!await _userManager.IsEmailConfirmedAsync(user))
-        {
-            return new AuthResponse { Success = false, Message = "Email is not confirmed" };
-     }  */  
+        /*   if (!await _userManager.IsEmailConfirmedAsync(user))
+           {
+               return new AuthResponse { Success = false, Message = "Email is not confirmed" };
+        }  */
 
         // Генерація JWT токену та Refresh токену
         var token = _jwtService.GenerateJwtToken(user);
         var refreshToken = _jwtService.GenerateRefreshToken();
 
-        // Збереження Refresh токену в користувача
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _userManager.UpdateAsync(user);
@@ -100,7 +98,7 @@ public class AuthService(
     public async Task<bool> ResetPasswordAsync(ResetPasswordDTO request)
     {
         if (string.IsNullOrWhiteSpace(request.Email))
-        return false;
+            return false;
 
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user == null) return false;

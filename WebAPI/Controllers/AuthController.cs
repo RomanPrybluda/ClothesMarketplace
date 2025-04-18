@@ -1,6 +1,6 @@
 ﻿using Domain;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI
@@ -16,6 +16,7 @@ namespace WebAPI
             _authService = authService;
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody][Required] RegistrationDTO request)
         {
@@ -24,6 +25,7 @@ namespace WebAPI
             return Ok(result);
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody][Required] LoginDTO request)
         {

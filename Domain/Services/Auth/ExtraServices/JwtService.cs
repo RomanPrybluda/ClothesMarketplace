@@ -6,7 +6,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Domain.Services.Auth.ExtraServices;
+namespace Domain;
 
 public class JwtService(IConfiguration _configuration)
 {
