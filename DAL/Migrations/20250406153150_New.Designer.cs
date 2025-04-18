@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ClothesMarketplaceDbContext))]
-    [Migration("20250401202433_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20250406153150_New")]
+    partial class New
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,7 +79,7 @@ namespace DAL.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
@@ -342,7 +342,7 @@ namespace DAL.Migrations
                     b.ToTable("ProductDetails");
                 });
 
-            modelBuilder.Entity("DAL.ProductImage", b =>
+            modelBuilder.Entity("DAL.Image", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -598,7 +598,7 @@ namespace DAL.Migrations
                     b.Navigation("DeliveryMethod");
                 });
 
-            modelBuilder.Entity("DAL.ProductImage", b =>
+            modelBuilder.Entity("DAL.Image", b =>
                 {
                     b.HasOne("DAL.Product", "Product")
                         .WithMany("Images")

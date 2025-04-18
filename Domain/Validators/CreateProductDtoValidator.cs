@@ -1,16 +1,10 @@
-﻿using Domain.Services.Product.DTO;
-using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FluentValidation;
 
 namespace Domain.Validators
 {
-    public class CreateProductDtoValidator :AbstractValidator<CreateProductTest>
+    public class CreateProductDtoValidator : AbstractValidator<CreateProductDTO>
     {
-        public CreateProductDtoValidator() 
+        public CreateProductDtoValidator()
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
@@ -30,7 +24,7 @@ namespace Domain.Validators
                 .Must(x => x > 0);
 
             RuleFor(x => x.Images)
-                .Must(x=>x.Count >=3)
+                .Must(x => x.Count >= 3)
                 .WithMessage("At least 3 images is required.")
                 .Must(x => x.Count <= 10)
                 .WithMessage("You can upload a maximum of 10 images.")

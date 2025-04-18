@@ -1,4 +1,5 @@
 ﻿using DAL;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace Domain
@@ -14,7 +15,9 @@ namespace Domain
 
         [MinLength(3, ErrorMessage = "Min photo quantity is 3.")]
         [MaxLength(10, ErrorMessage = "Max photo quantity is 10.")]
-        public List<ProductImageDTO> Images { get; set; } = new List<ProductImageDTO>();
+        public List<IFormFile> Images { get; set; }
+
+        public int MainImageIndex { get; set; } = 0;
 
         public Guid BrandId { get; set; }
 
@@ -36,12 +39,6 @@ namespace Domain
                 Name = request.Name,
                 Description = request.Description,
                 DollarPrice = request.DollarPrice,
-                Images = request.Images.Select(dto => new ProductImage
-                {
-                    Id = Guid.NewGuid(),
-                    ImageUrl = dto.ImageUrl,
-                    ProductId = Guid.Empty
-                }).ToList(),
                 BrandId = request.BrandId,
                 ColorId = request.ColorId,
                 ProductSizeId = request.ProductSizeId,

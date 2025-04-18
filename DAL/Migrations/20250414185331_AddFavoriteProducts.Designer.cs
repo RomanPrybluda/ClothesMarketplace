@@ -355,7 +355,7 @@ namespace DAL.Migrations
                     b.ToTable("ProductDetails");
                 });
 
-            modelBuilder.Entity("DAL.ProductImage", b =>
+            modelBuilder.Entity("DAL.Image", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -626,7 +626,7 @@ namespace DAL.Migrations
                     b.Navigation("DeliveryMethod");
                 });
 
-            modelBuilder.Entity("DAL.ProductImage", b =>
+            modelBuilder.Entity("DAL.Image", b =>
                 {
                     b.HasOne("DAL.Product", "Product")
                         .WithMany("Images")

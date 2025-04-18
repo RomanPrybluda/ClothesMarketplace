@@ -12,7 +12,7 @@ namespace Domain
 
         public decimal DollarPrice { get; set; }
 
-        public ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();
+        public ICollection<Image> Images { get; set; } = new List<Image>();
 
         public Guid BrandId { get; set; }
 

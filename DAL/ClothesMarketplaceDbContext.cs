@@ -29,7 +29,7 @@ namespace DAL
 
         public DbSet<ProductCondition> ProductConditions { get; set; }
 
-        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<Image> ProductImages { get; set; }
 
         public DbSet<ProductSize> ProductSizes { get; set; }
 

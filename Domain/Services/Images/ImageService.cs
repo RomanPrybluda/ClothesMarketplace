@@ -2,17 +2,8 @@
 using Domain.Helpers;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.Hosting;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
-using SixLabors.ImageSharp.Formats;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Services.Images
 {
@@ -82,5 +73,8 @@ namespace Domain.Services.Images
             var uniqueFileName = newFileName + fileExtension;
             return uniqueFileName;
         }
+
+
+
     }
 }

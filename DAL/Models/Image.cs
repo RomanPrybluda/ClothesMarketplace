@@ -1,6 +1,6 @@
 ﻿namespace DAL
 {
-    public class ProductImage
+    public class Image
     {
         public Guid Id { get; set; }
 

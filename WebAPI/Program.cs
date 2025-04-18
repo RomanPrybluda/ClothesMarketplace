@@ -5,14 +5,20 @@ using Domain.Helpers;
 using Domain.Services.Images;
 using Domain.Validators;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 using System.Text.Json.Serialization;
+using WebAPI;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var configuration = builder.Configuration;
 
 var connectionString = builder.Configuration.GetConnectionString("Default");
 
@@ -28,14 +34,9 @@ if (string.IsNullOrWhiteSpace(connectionString))
     throw new InvalidOperationException("Connection string is not set. Check environment variables, appsettings.json, or secrets.");
 }
 
-builder.Services.AddScoped<CategoryService>();
-builder.Services.AddScoped<ProductService>();
-builder.Services.AddScoped<AppUserService>();
-builder.Services.AddScoped<FavoriteProductService>();
-builder.Services.AddScoped<IImageService, ImageService>();
-builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
-
-builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -46,6 +47,13 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 
 builder.Services.AddSwaggerGen(c =>
 {
+    c.SwaggerDoc("v1",
+    new OpenApiInfo
+    {
+        Title = "Clothes Marketplace API",
+        Version = "v1"
+    });
+
     c.AddSecurityDefinition("APIKey", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
@@ -53,6 +61,7 @@ builder.Services.AddSwaggerGen(c =>
         Name = "Authorization",
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey
     });
+
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -70,15 +79,57 @@ builder.Services.AddSwaggerGen(c =>
     c.MapType<IFormFile>(() => new OpenApiSchema { Type = "string", Format = "binary" });
 });
 
-
 builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
 {
     options.UseSqlServer(connectionString, b => b.MigrationsAssembly("DAL"));
 });
 
-builder.Services.AddIdentity<AppUser, IdentityRole>()
-    .AddEntityFrameworkStores<ClothesMarketplaceDbContext>()
-    .AddDefaultTokenProviders();
+builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 12;
+})
+.AddEntityFrameworkStores<ClothesMarketplaceDbContext>();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = configuration["Jwt:Issuer"],
+
+        ValidateAudience = true,
+        ValidAudience = configuration["Jwt:Audience"],
+
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(configuration["Jwt:Key"])
+        ),
+        ValidateLifetime = true
+    };
+});
+
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<AppUserService>();
+builder.Services.AddScoped<FavoriteProductService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
 builder.Logging.AddConsole();
 
@@ -152,13 +203,25 @@ using (var scope = app.Services.CreateScope())
 //if (app.Environment.IsDevelopment())
 //{
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Clothes Marketplace API");
+    options.DocumentTitle = "Clothes Marketplace";
+});
 //}
 
-app.UseCors("AllowAll");
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseCors(x => x
+     .AllowAnyMethod()
+     .AllowAnyHeader()
+     .AllowCredentials()
+     .SetIsOriginAllowed(origin => true));
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
