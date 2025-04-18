@@ -1,11 +1,9 @@
 ﻿using Domain;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI
 {
-    [Authorize]
     [ApiController]
     [Produces("application/json")]
     [Route("products")]
@@ -34,7 +32,7 @@ namespace WebAPI
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateProductAsync([FromBody][Required] CreateProductDTO request)
+        public async Task<ActionResult> CreateProductAsync([FromForm][FromBody][Required] CreateProductDTO request)
         {
             var product = await _productService.CreateProductAsync(request);
             return Ok(product);
