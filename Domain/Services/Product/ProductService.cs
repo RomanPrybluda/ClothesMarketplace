@@ -1,10 +1,6 @@
-﻿using Azure.Core;
-using DAL;
+﻿using DAL;
 using Domain.Abstractions;
-using Domain.Mapping;
-using Domain.Services.Product.DTO;
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain
@@ -12,14 +8,12 @@ namespace Domain
     public class ProductService
     {
         private readonly ClothesMarketplaceDbContext _context;
-        private readonly IValidator<CreateProductTest> _createProductValidator;
         private readonly IImageService _imageService;
 
         public ProductService(ClothesMarketplaceDbContext context,
-            IValidator<CreateProductTest> createProductValidator, IImageService imageService)
+            IImageService imageService)
         {
             _context = context;
-            _createProductValidator = createProductValidator;
             _imageService = imageService;
         }
 
@@ -92,45 +86,45 @@ namespace Domain
         public async Task<ProductByIdDTO> GetProductByIdAsync(Guid id)
         {
             var productById = await _context.Products.FindAsync(id)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"No Product with ID {id}");
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Product not found with ID {id}");
 
-            return ProductByIdDTO.FromProduct(productById);
+            var productDTO = ProductByIdDTO.FromProduct(productById);
+            return productDTO;
         }
 
-        public async Task<ProductDetailsDto> CreateProductAsync(CreateProductTest request)
+        public async Task<ProductDTO> CreateProductAsync(CreateProductDTO request)
         {
-            var validationResult = await _createProductValidator.ValidateAsync(request);
-            if (validationResult.IsValid)
-            {
-                var product = ProductMappingExtensions.ToProduct(request);
-                product.Id = Guid.NewGuid();
-                var imagesUrls = await _imageService.UploadMultipleImagesAsync(request.Images);
-                AttachProductImages(product, imagesUrls, request.MainImageIndex);
-                _context.Products.Add(product);
-                await _context.SaveChangesAsync();
-                var createdProduct = _context.Products.Where(p => p.Id == product.Id)
-                    .Select(p => new ProductDetailsDto()
-                    {
-                        Id = p.Id,
-                        Name = p.Name,
-                        Description = p.Description,
-                        DollarPrice = p.DollarPrice,
-                        LikesCount = p.LikesCount,
-                        Images = p.Images.Select(i => new ImageDto() { Url = i.ImageUrl, IsMain = i.IsMain }).ToList(),
-                        Brand = p.Brand.Name,
-                        Color = p.Color.Name,
-                        ProductSize = p.ProductSize.Value,
-                        Category = p.Category.Name,
-                        ForWhom = p.ForWhom.Name,
-                        ProductCondition = p.ProductCondition.Name
-                    })
-                    .FirstOrDefault();
+            var existingProduct = await _context.Products.FirstOrDefaultAsync(p => p.Name == request.Name)
+                ?? throw new CustomException(CustomExceptionType.ProductAlreadyExists, $"Product with name {request.Name} already exists.");
 
-                return createdProduct;
-            }
+            var brand = await _context.Brands.FindAsync(request.BrandId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Brand not found with ID {request.CategoryId}");
 
-            // TODO: Temporary stub – returns deafult value for product if it is invalid
-            return default;
+            var color = await _context.Colors.FindAsync(request.ColorId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Color not found with ID {request.CategoryId}");
+
+            var productSize = await _context.ProductSizes.FindAsync(request.ProductSizeId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Product size not found with ID {request.CategoryId}");
+
+            var category = await _context.Categories.FindAsync(request.CategoryId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Category not found with ID {request.CategoryId}");
+
+            var forWhom = await _context.ForWhoms.FindAsync(request.ForWhomId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"For whom not found with ID {request.CategoryId}");
+
+            var ProductCondition = await _context.ProductConditions.FindAsync(request.ProductConditionId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Product condition not found with ID {request.CategoryId}");
+
+            var product = CreateProductDTO.ToProduct(request);
+
+            var imagesUrls = await _imageService.UploadMultipleImagesAsync(request.Images);
+            AttachProductImages(product, imagesUrls, request.MainImageIndex);
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+            var productDTO = ProductDTO.FromProduct(product);
+
+            return productDTO;
         }
 
         public async Task<ProductDTO> UpdateProductAsync(Guid id, UpdateProductDTO request)
@@ -138,8 +132,23 @@ namespace Domain
             var product = await _context.Products.FindAsync(id)
                 ?? throw new CustomException(CustomExceptionType.NotFound, $"Product with ID {id} not found.");
 
+            var brand = await _context.Brands.FindAsync(request.BrandId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Brand not found with ID {request.CategoryId}");
+
+            var color = await _context.Colors.FindAsync(request.ColorId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Color not found with ID {request.CategoryId}");
+
+            var productSize = await _context.ProductSizes.FindAsync(request.ProductSizeId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Product size not found with ID {request.CategoryId}");
+
             var category = await _context.Categories.FindAsync(request.CategoryId)
-                ?? throw new CustomException(CustomExceptionType.NotFound, $"No category found with ID {request.CategoryId}");
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Category not found with ID {request.CategoryId}");
+
+            var forWhom = await _context.ForWhoms.FindAsync(request.ForWhomId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"For whom not found with ID {request.CategoryId}");
+
+            var ProductCondition = await _context.ProductConditions.FindAsync(request.ProductConditionId)
+                ?? throw new CustomException(CustomExceptionType.NotFound, $"Product condition not found with ID {request.CategoryId}");
 
             ValidateImages(request.Images.Select(img => img.ImageUrl));
 
@@ -183,9 +192,9 @@ namespace Domain
             for (int i = 0; i < imagesUrls.Count; i++)
             {
                 if (i == mainImageIndex)
-                    product.Images.Add(new ProductImage { ImageUrl = imagesUrls[i], IsMain = true });
+                    product.Images.Add(new Image { ImageUrl = imagesUrls[i], IsMain = true });
                 else
-                    product.Images.Add(new ProductImage { ImageUrl = imagesUrls[i], IsMain = false });
+                    product.Images.Add(new Image { ImageUrl = imagesUrls[i], IsMain = false });
             }
         }
     }

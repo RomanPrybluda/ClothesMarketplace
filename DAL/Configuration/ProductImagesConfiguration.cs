@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace DAL
 {
-    public class ProductImagesConfiguration : IEntityTypeConfiguration<ProductImage>
+    public class ProductImagesConfiguration : IEntityTypeConfiguration<Image>
     {
-        public void Configure(EntityTypeBuilder<ProductImage> builder)
+        public void Configure(EntityTypeBuilder<Image> builder)
         {
             builder.HasKey(pi => pi.Id);
             builder.Property(pi => pi.Id)

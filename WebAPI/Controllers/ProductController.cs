@@ -1,8 +1,6 @@
 ﻿using Domain;
-using Domain.Services.Product.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.Filters;
 using System.ComponentModel.DataAnnotations;
 
 namespace WebAPI

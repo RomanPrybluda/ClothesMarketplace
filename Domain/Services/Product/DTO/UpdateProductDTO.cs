@@ -30,7 +30,7 @@ namespace Domain
             product.Name = Name;
             product.Description = Description;
             product.DollarPrice = DollarPrice;
-            product.Images = Images.Select(img => new ProductImage
+            product.Images = Images.Select(img => new Image
             {
                 ImageUrl = img.ImageUrl,
                 IsMain = img.IsMain,
