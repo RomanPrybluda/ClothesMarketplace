@@ -234,7 +234,11 @@ using (var scope = app.Services.CreateScope())
 //if (app.Environment.IsDevelopment())
 //{
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "Clothes Marketplace API");
+    options.DocumentTitle = "Clothes Marketplace";
+});
 //}
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
