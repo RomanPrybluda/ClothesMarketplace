@@ -24,7 +24,7 @@
 
         public Guid? ProductSizeId { get; set; }
 
-        public ProductSize? ProductSize { get; set; }
+        public ProductSize ProductSize { get; set; }
 
         public Guid CategoryId { get; set; }
 
@@ -49,5 +49,7 @@
         public string? BuyerId { get; set; }
 
         public AppUser? Buyer { get; set; }
+
+        public ICollection<AppUser> FavoritedByUsers { get; set; } = new List<AppUser>();
     }
 }

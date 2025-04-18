@@ -1,5 +1,10 @@
 using DAL;
 using Domain;
+using Domain.Abstractions;
+using Domain.Helpers;
+using Domain.Services.Images;
+using Domain.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +80,34 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.WriteIndented = true;
+});
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("APIKey", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey
+    });
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "APIKey"
+                }
+            },
+            new List<string>()
+        }
+    });
+    c.MapType<IFormFile>(() => new OpenApiSchema { Type = "string", Format = "binary" });
 });
 
 builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
@@ -121,6 +154,12 @@ builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ProductService>();
+builder.Services.AddScoped<AppUserService>();
+builder.Services.AddScoped<FavoriteProductService>();
+builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
 builder.Logging.AddConsole();
 
@@ -146,9 +185,9 @@ using (var scope = app.Services.CreateScope())
     var pendingMigrations = context.Database.GetPendingMigrations().ToList();
 
     if (!appliedMigrations.Any())
-    {
+
         context.Database.Migrate();
-    }
+
     else if (pendingMigrations.Any())
     {
         foreach (var migration in pendingMigrations)
@@ -183,6 +222,9 @@ using (var scope = app.Services.CreateScope())
 
     var appUserInitializer = new AppUserInitializer(userManager);
     appUserInitializer.InitializeAppUsers();
+
+    var adminInitializer = new AdminInitializer(userManager, roleManager);
+    await adminInitializer.InitializeAdmin();
 
     var productInitializer = new ProductInitializer(context);
     productInitializer.InitializeProducts();
