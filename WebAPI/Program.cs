@@ -215,6 +215,8 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles();
+
 app.UseCors(x => x
      .AllowAnyMethod()
      .AllowAnyHeader()
