@@ -46,7 +46,7 @@ namespace Domain.Services.Images
                 var fullUrl = Path.Combine(baseUrl, uniqueFileName);
                 var webpImage = ImageConverter.ConvertToWebpImageFormat(compressedContent);
                 await File.WriteAllBytesAsync(fullUrl, webpImage);
-                return fullUrl;
+                return uniqueFileName;
             }
             else
             {
