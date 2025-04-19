@@ -1,4 +1,5 @@
-﻿using Domain.Abstractions;
+﻿using Bogus.Extensions.UnitedKingdom;
+using Domain.Abstractions;
 using Domain.Helpers;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -43,7 +44,8 @@ namespace Domain.Services.Images
                 var filePath = Path.Combine(path, uniqueFileName);
                 var webpImage = ImageConverter.ConvertToWebpImageFormat(compressedContent);
                 await File.WriteAllBytesAsync(filePath, webpImage);
-                return filePath;
+                var fileNameToReturn = uniqueFileName.Split('.')[0];
+                return fileNameToReturn;
             }
             else
             {

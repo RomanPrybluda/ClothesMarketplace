@@ -32,7 +32,7 @@ namespace Domain
             product.DollarPrice = DollarPrice;
             product.Images = Images.Select(img => new Image
             {
-                ImageUrl = img.ImageUrl,
+                ImageName = img.ImageUrl,
                 IsMain = img.IsMain,
                 ProductId = product.Id
             }).ToList();
