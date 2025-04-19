@@ -45,8 +45,9 @@ namespace Domain.Services.Images
                 var uniqueFileName = GenerateUniqueImageName(file.FileName);
                 var fullUrl = Path.Combine(baseUrl, uniqueFileName);
                 var webpImage = ImageConverter.ConvertToWebpImageFormat(compressedContent);
+                string fileNameWithoutExtension = uniqueFileName.Split('.')[0];
                 await File.WriteAllBytesAsync(fullUrl, webpImage);
-                return uniqueFileName;
+                return fileNameWithoutExtension;
             }
             else
             {
