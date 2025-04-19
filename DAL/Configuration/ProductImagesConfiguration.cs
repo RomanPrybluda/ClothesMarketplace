@@ -12,7 +12,7 @@ namespace DAL
                 .HasDefaultValueSql("NEWID()")
                 .ValueGeneratedOnAdd();
 
-            builder.Property(pi => pi.ImageUrl)
+            builder.Property(pi => pi.FullName)
                 .IsRequired();
 
             builder.HasOne(pi => pi.Product)

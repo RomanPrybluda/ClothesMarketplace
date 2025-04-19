@@ -19,8 +19,8 @@ namespace Domain
                 Id = product.Id,
                 Name = product.Name,
                 DollarPrice = product.DollarPrice,
-                UrlMainImage = product.Images.FirstOrDefault(img => img.IsMain)?.ImageUrl
-                      ?? product.Images.FirstOrDefault()?.ImageUrl
+                UrlMainImage = product.Images.FirstOrDefault(img => img.IsMain)?.FullName
+                      ?? product.Images.FirstOrDefault()?.FullName
             };
         }
 

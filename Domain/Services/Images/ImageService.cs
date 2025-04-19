@@ -2,6 +2,7 @@
 using Domain.Helpers;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using SixLabors.ImageSharp;
 
@@ -12,12 +13,15 @@ namespace Domain.Services.Images
         private readonly IHostEnvironment _hostEnvironment;
         private readonly IValidator<IFormFile> _fileValidator;
         private readonly IImageEncoderFactory _encoderFactory;
+        private readonly IConfiguration _configuration;
 
-        public ImageService(IHostEnvironment environment, IValidator<IFormFile> fileValidator, IImageEncoderFactory encoderFactory)
+        public ImageService(IHostEnvironment environment, IValidator<IFormFile> fileValidator, 
+            IImageEncoderFactory encoderFactory, IConfiguration configuration)
         {
             _hostEnvironment = environment;
             _fileValidator = fileValidator;
             _encoderFactory = encoderFactory;
+            _configuration = configuration;
         }
 
         public async Task<List<string>> UploadMultipleImagesAsync(List<IFormFile> imageFiles)
@@ -36,14 +40,13 @@ namespace Domain.Services.Images
             var validationResult = await _fileValidator.ValidateAsync(file);
             if (validationResult.IsValid)
             {
-                string path = Path.Combine(_hostEnvironment.ContentRootPath, "wwwroot", "images");
+                string baseUrl = _configuration["ImageBaseUrl"];
                 var compressedContent = await CompressImage(file);
-                Directory.CreateDirectory(path);
                 var uniqueFileName = GenerateUniqueImageName(file.FileName);
-                var filePath = Path.Combine(path, uniqueFileName);
+                var fullUrl = Path.Combine(baseUrl, uniqueFileName);
                 var webpImage = ImageConverter.ConvertToWebpImageFormat(compressedContent);
-                await File.WriteAllBytesAsync(filePath, webpImage);
-                return filePath;
+                await File.WriteAllBytesAsync(fullUrl, webpImage);
+                return fullUrl;
             }
             else
             {

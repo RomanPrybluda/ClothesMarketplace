@@ -191,9 +191,9 @@ namespace Domain
             for (int i = 0; i < imagesUrls.Count; i++)
             {
                 if (i == mainImageIndex)
-                    product.Images.Add(new Image { ImageUrl = imagesUrls[i], IsMain = true });
+                    product.Images.Add(new Image { FullName = imagesUrls[i], IsMain = true });
                 else
-                    product.Images.Add(new Image { ImageUrl = imagesUrls[i], IsMain = false });
+                    product.Images.Add(new Image { FullName = imagesUrls[i], IsMain = false });
             }
         }
     }
