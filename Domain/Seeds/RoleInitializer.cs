@@ -13,18 +13,32 @@ namespace DAL
 
         public void InitializeRoles()
         {
-            string[] roleNames = { "Admin", "User" };
-
-            foreach (var roleName in roleNames)
+            var roles = new List<IdentityRole>
             {
-                var roleExist = _roleManager.RoleExistsAsync(roleName).Result;
-
-                if (!roleExist)
+                new IdentityRole
                 {
-                    var createResult = _roleManager.CreateAsync(new IdentityRole(roleName)).Result;
+                    Id = "B31C4D4F-8C8B-44B5-94A7-30B6947E9C93",
+                    Name = "Admin",
+                    NormalizedName = "ADMIN"
+                },
+                new IdentityRole
+                {
+                    Id = "ED292C9E-0A58-4A17-AE91-68986B0B3AC8",
+                    Name = "User",
+                    NormalizedName = "USER"
+                }
+            };
+
+            foreach (var role in roles)
+            {
+                var roleExists = _roleManager.RoleExistsAsync(role.Name).Result;
+
+                if (!roleExists)
+                {
+                    var createResult = _roleManager.CreateAsync(role).Result;
                     if (!createResult.Succeeded)
                     {
-                        throw new InvalidOperationException($"Fail to create role {roleName}.");
+                        throw new InvalidOperationException($"Failed to create role {role.Name}");
                     }
                 }
             }
