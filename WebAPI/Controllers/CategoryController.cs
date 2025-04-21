@@ -7,8 +7,7 @@ namespace WebAPI
 {
     [ApiController]
     [Produces("application/json")]
-    [Route("categories")]
-    [Authorize]
+    [Route("categories")]   
 
     public class CategoryController : ControllerBase
     {
@@ -33,6 +32,7 @@ namespace WebAPI
             return Ok(category);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> CreateCategoryAsync([FromBody][Required] CreateCategoryDTO request)
         {
@@ -40,6 +40,7 @@ namespace WebAPI
             return Ok(category);
         }
 
+        [Authorize]
         [HttpPut("{id:Guid}")]
         public async Task<ActionResult> UpdateCategoryAsync(Guid id, [FromBody][Required] UpdateCategoryDTO request)
         {
@@ -47,6 +48,7 @@ namespace WebAPI
             return Ok(category);
         }
 
+        [Authorize]
         [HttpDelete("{id:Guid}")]
         public async Task<ActionResult> DeleteCategoryAsync([Required] Guid id)
         {
