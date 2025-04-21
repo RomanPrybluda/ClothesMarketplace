@@ -8,7 +8,6 @@ namespace WebAPI
     [ApiController]
     [Produces("application/json")]
     [Route("products")]
-    [Authorize]
 
     public class ProductController : ControllerBase
     {
@@ -33,6 +32,7 @@ namespace WebAPI
             return Ok(product);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> CreateProductAsync([FromForm][FromBody][Required] CreateProductDTO request)
         {
@@ -40,6 +40,7 @@ namespace WebAPI
             return Ok(product);
         }
 
+        [Authorize]
         [HttpPut("{id:Guid}")]
         public async Task<ActionResult> UpdateProductAsync([Required] Guid id, [FromBody][Required] UpdateProductDTO request)
         {
@@ -47,6 +48,7 @@ namespace WebAPI
             return Ok(updatedProduct);
         }
 
+        [Authorize]
         [HttpDelete("{id:Guid}")]
         public async Task<ActionResult> DeleteProductAsync([Required] Guid id)
         {
