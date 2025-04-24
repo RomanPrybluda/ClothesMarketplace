@@ -1,5 +1,4 @@
 ﻿using Domain.Abstractions;
-using Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Jpeg;
@@ -23,8 +22,7 @@ namespace Domain.Helpers
                 ".jpg" => new JpegEncoder { Quality = 75},
                 ".jpeg" => new JpegEncoder { Quality = 75},
                 ".png" => new PngEncoder { CompressionLevel = PngCompressionLevel.BestCompression},
-                ".webp" => new WebpEncoder(),
-                _ => throw new NotSupportedImageFormatException($"Unsupported image format: {extension}")
+                ".webp" => new WebpEncoder()
             };
         }
     }
