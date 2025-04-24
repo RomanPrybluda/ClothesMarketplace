@@ -70,7 +70,8 @@ namespace Domain
 
             if (category == null)
                 throw new CustomException(CustomExceptionType.NotFound, $"No category found with ID {id}");
-            category.ImageName = await _imageService.UploadImageAsync(request.Image);
+            if(request.Image != null)
+                category.ImageName = await _imageService.UploadImageAsync(request.Image);
 
             request.UpdateCategory(category);
 

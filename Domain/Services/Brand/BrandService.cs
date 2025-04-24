@@ -65,8 +65,9 @@ namespace Domain.Services.Brand
 
             if (existingBrand is null)
                 throw new CustomException(CustomExceptionType.NotFound, $"No brand found with ID {Id}");
+            if (request.Image != null)
+                existingBrand.ImageName = await _imageService.UploadImageAsync(request.Image);
 
-            existingBrand.ImageName = await _imageService.UploadImageAsync(request.Image);
             existingBrand.Name = request.Name;
 
             _context.Update(existingBrand);

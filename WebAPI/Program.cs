@@ -2,6 +2,7 @@ using DAL;
 using Domain;
 using Domain.Abstractions;
 using Domain.Helpers;
+using Domain.Services.Brand;
 using Domain.Services.Images;
 using Domain.Validators;
 using FluentValidation;
@@ -127,6 +128,7 @@ builder.Services.AddScoped<AppUserService>();
 builder.Services.AddScoped<FavoriteProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
+builder.Services.AddScoped<BrandService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
