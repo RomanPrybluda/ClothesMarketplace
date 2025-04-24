@@ -34,7 +34,7 @@ namespace WebAPI
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult> CreateCategoryAsync([FromBody][Required] CreateCategoryDTO request)
+        public async Task<ActionResult> CreateCategoryAsync([FromForm][Required] CreateCategoryDTO request)
         {
             var category = await _categoryService.CreateCategoryAsync(request);
             return Ok(category);
@@ -42,7 +42,7 @@ namespace WebAPI
 
         [Authorize]
         [HttpPut("{id:Guid}")]
-        public async Task<ActionResult> UpdateCategoryAsync(Guid id, [FromBody][Required] UpdateCategoryDTO request)
+        public async Task<ActionResult> UpdateCategoryAsync(Guid id, [FromForm][Required] UpdateCategoryDTO request)
         {
             var category = await _categoryService.UpdateCategoryAsync(id, request);
             return Ok(category);

@@ -3,15 +3,14 @@ using Microsoft.AspNetCore.Http;
 
 namespace Domain
 {
-    public class CreateCategoryDTO
+    public class CreateBrandDTO
     {
         public string Name { get; set; } = string.Empty;
-
         public IFormFile Image { get; set; }
 
-        public static Category ToCategory(CreateCategoryDTO request)
+        public static Brand ToBrand(CreateBrandDTO request)
         {
-            return new Category
+            return new Brand
             {
                 Id = Guid.NewGuid(),
                 Name = request.Name,

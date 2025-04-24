@@ -8,12 +8,15 @@ namespace Domain
 
         public string Name { get; set; } = string.Empty;
 
+        public string ImageName { get; set; } = string.Empty;
+
         public static CategoryDTO FromCategory(Category category)
         {
             return new CategoryDTO
             {
                 Id = category.Id,
                 Name = category.Name,
+                ImageName = category.ImageName
             };
         }
     }

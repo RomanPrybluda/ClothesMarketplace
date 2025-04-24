@@ -1,4 +1,5 @@
 ﻿using DAL;
+using Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain
@@ -6,10 +7,12 @@ namespace Domain
     public class CategoryService
     {
         private readonly ClothesMarketplaceDbContext _context;
+        private readonly IImageService _imageService;
 
-        public CategoryService(ClothesMarketplaceDbContext context)
+        public CategoryService(ClothesMarketplaceDbContext context, IImageService imageService)
         {
             _context = context;
+            _imageService = imageService;
         }
 
         public async Task<IEnumerable<CategoryDTO>> GetCategoriesAsync()
@@ -50,7 +53,8 @@ namespace Domain
                 throw new CustomException(CustomExceptionType.IsAlreadyExists, $"Category '{request.Name}' already exists.");
 
             var category = CreateCategoryDTO.ToCategory(request);
-
+            var imageName = await _imageService.UploadImageAsync(request.Image);
+            category.ImageName = imageName;
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();
 
@@ -66,6 +70,8 @@ namespace Domain
 
             if (category == null)
                 throw new CustomException(CustomExceptionType.NotFound, $"No category found with ID {id}");
+            if(request.Image != null)
+                category.ImageName = await _imageService.UploadImageAsync(request.Image);
 
             request.UpdateCategory(category);
 
