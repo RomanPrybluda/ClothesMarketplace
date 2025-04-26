@@ -9,12 +9,12 @@ namespace DAL.Repository
 {
     public class UserRepository(UserManager<AppUser> userManager)
     {
-        public async Task<AppUser> FindByEmail(string email)
+        public async Task<AppUser> FindByEmailAsync(string email)
         {
             return await userManager.FindByEmailAsync(email);
         }
 
-        public async Task<AppUser> FindByName(string userName)
+        public async Task<AppUser> FindByNameAsync(string userName)
         {
             return await userManager.FindByNameAsync(userName);
         }
