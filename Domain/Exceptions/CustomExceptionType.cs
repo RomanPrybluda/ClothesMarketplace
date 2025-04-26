@@ -10,8 +10,6 @@
         InvalidInputData = 6,
         ProductAlreadyExists = 7,
         InvalidData = 8,
-        EmailIsAlreadyTaken = 9,
-        UsernameIsAlreadyTaken = 10,
         PasswordsDoNotMatch = 11,
     }
 }

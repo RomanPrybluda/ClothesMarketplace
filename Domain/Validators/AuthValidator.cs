@@ -10,23 +10,20 @@ namespace Domain.Validators
 {
     public class AuthValidator(UserRepository userRepository)
     {
-        public Task<bool> ValidateRegistrationDto(RegistrationDTO request)
+        public async Task<bool> ValidateRegistrationDto(RegistrationDTO request)
         {
             var existingUser = await userRepository.FindByEmailAsync(request.Email);
+            
             if (existingUser != null)
-            {
-                return new AuthResponse { Success = false, Errors = ["Email is already taken."] };
-            }
+                throw new CustomException(CustomExceptionType.IsAlreadyExists, "Email is already taken");
 
-            if (await _userManager.FindByNameAsync(request.UserName) != null)
-            {
-                return new AuthResponse { Success = false, Errors = ["Username is already taken."] };
-            }
+            if (await userRepository.FindByNameAsync(request.UserName) != null)
+                throw new CustomException(CustomExceptionType.IsAlreadyExists, "Username is already taken.");
 
             if (request.Password != request.ConfirmPassword)
-            {
-                return new AuthResponse { Success = false, Errors = ["Passwords do not match."] };
-            }
+                throw new CustomException(CustomExceptionType.PasswordsDoNotMatch, "Passwords do not match.");
+
+            return true;
         }
     }
 }
