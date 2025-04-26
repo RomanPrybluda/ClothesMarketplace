@@ -1,4 +1,5 @@
 ﻿using DAL;
+using Domain.Validators;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,24 +8,20 @@ namespace Domain;
 public class AuthService(
     UserManager<AppUser> _userManager,
     JwtService _jwtService,
-    EmailService _emailService)
+    EmailService _emailService,
+    AuthValidator authValidator)
 {
     public async Task<AuthResponse> RegisterAsync(RegistrationDTO request)
     {
-        var existingUser = await _userManager.FindByEmailAsync(request.Email);
-        if (existingUser != null)
-        {
-            return new AuthResponse { Success = false, Errors = ["Email is already taken."] };
-        }
+        var isValid = await authValidator.ValidateRegistrationDto(request);
 
-        if (await _userManager.FindByNameAsync(request.UserName) != null)
+        if (!isValid)
         {
-            return new AuthResponse { Success = false, Errors = ["Username is already taken."] };
-        }
-
-        if (request.Password != request.ConfirmPassword)
-        {
-            return new AuthResponse { Success = false, Errors = ["Passwords do not match."] };
+            return new AuthResponse
+            {
+                Success = false,
+                Errors = new List<string> { "Validation failed" }
+            };
         }
 
         var user = new AppUser
