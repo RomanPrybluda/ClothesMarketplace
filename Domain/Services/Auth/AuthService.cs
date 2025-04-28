@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DAL;
+using DAL.Models;
 using Domain.Services.Auth.DTO;
 using Domain.Validators;
 using Domain.Сommon.Wrappers;
@@ -13,8 +14,10 @@ public class AuthService(
     JwtService _jwtService,
     EmailService _emailService,
     AuthValidator authValidator,
-    IMapper mapper)
+    IMapper mapper,
+    AppUserService _userService)
 {
+
     public async Task<Result<RegistrationResponseDTO>> RegisterAsync(RegistrationDTO request)
     {
         var validationResult = await authValidator.ValidateRegistrationDto(request);
@@ -23,19 +26,13 @@ public class AuthService(
             return Result<RegistrationResponseDTO>.Failure(validationResult.GetExceptionsList());
 
         var user = mapper.Map<AppUser>(request);
-        var userCreateResult = await _userManager.CreateAsync(user, request.Password);
-        
-        if (!userCreateResult.Succeeded)
-            return Result<RegistrationResponseDTO>.Failure(userCreateResult.Errors);
+        await _userService.CreateUserAsync(user, request.Password, RoleRegistry.User);
 
         user.RefreshToken = _jwtService.GenerateRefreshToken();
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         var token = _jwtService.GenerateJwtToken(user);
 
-        var userUpdateResult = await _userManager.UpdateAsync(user);
-
-        if (!userUpdateResult.Succeeded)
-            return Result<RegistrationResponseDTO>.Failure(userUpdateResult.Errors);
+        await _userService.UpdateUserAsync(user.Id, user);
 
         return Result<RegistrationResponseDTO>.Success(new RegistrationResponseDTO
         {

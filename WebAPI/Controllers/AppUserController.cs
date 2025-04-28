@@ -20,7 +20,7 @@ public class AppUserController : ControllerBase
     [HttpGet("{id:Guid}")]
     public async Task<ActionResult> GetUser([Required] Guid id)
     {
-        var user = await _userService.GetUserByIdAsync(id);
+        var user = await _userService.GetUserByIdAsync(id.ToString());
         return Ok(user);
     }
 
@@ -31,10 +31,10 @@ public class AppUserController : ControllerBase
         return Ok(user);
     }
 
-    [HttpPut("{id:Guid}")]
-    public async Task<ActionResult> UpdateUserAsync([Required] Guid id, [FromBody][Required] UpdateAppUserDTO request)
-    {
-        var user = await _userService.UpdateUserAsync(id, request);
-        return Ok(user);
-    }
+    //[HttpPut("{id:Guid}")]
+    //public async Task<ActionResult> UpdateUserAsync([Required] Guid id, [FromBody][Required] UpdateAppUserDTO request)
+    //{
+    //    var user = await _userService.UpdateUserAsync(id.ToString(), request);
+    //    return Ok(user);
+    //}
 }

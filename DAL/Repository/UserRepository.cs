@@ -34,9 +34,9 @@ namespace DAL.Repository
             return await userManager.FindByNameAsync(userName);
         }
 
-        public async Task<AppUser> FindByIdAsync(Guid userId)
+        public async Task<AppUser> FindByIdAsync(string userId)
         {
-            return await userManager.FindByIdAsync(userId.ToString());
+            return await userManager.FindByIdAsync(userId);
         }
 
         public async Task<IdentityResult> CreateUserAsync(AppUser user, string password)
@@ -49,7 +49,7 @@ namespace DAL.Repository
             return await userManager.UpdateAsync(user);
         }
 
-        public async Task<IdentityResult> DeleteUserAsync(Guid userId)
+        public async Task<IdentityResult> DeleteUserAsync(string userId)
         {
             var user = await FindByIdAsync(userId);
             
