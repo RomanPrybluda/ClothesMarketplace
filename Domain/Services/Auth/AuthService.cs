@@ -1,5 +1,8 @@
-﻿using DAL;
+﻿using AutoMapper;
+using DAL;
+using Domain.Services.Auth.DTO;
 using Domain.Validators;
+using Domain.Сommon.Wrappers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,51 +12,37 @@ public class AuthService(
     UserManager<AppUser> _userManager,
     JwtService _jwtService,
     EmailService _emailService,
-    AuthValidator authValidator)
+    AuthValidator authValidator,
+    IMapper mapper)
 {
-    public async Task<AuthResponse> RegisterAsync(RegistrationDTO request)
+    public async Task<Result<RegistrationResponseDTO>> RegisterAsync(RegistrationDTO request)
     {
-        var isValid = await authValidator.ValidateRegistrationDto(request);
+        var validationResult = await authValidator.ValidateRegistrationDto(request);
 
-        if (!isValid)
-        {
-            return new AuthResponse
-            {
-                Success = false,
-                Errors = new List<string> { "Validation failed" }
-            };
-        }
+        if(!validationResult.IsValid)
+            return Result<RegistrationResponseDTO>.Failure(validationResult.GetExceptionsList());
 
-        var user = new AppUser
-        {
-            UserName = request.UserName,
-            Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            RefreshToken = _jwtService.GenerateRefreshToken(),
-            RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7) // например, 7 дней
-        };
+        var user = mapper.Map<AppUser>(request);
+        var userCreateResult = await _userManager.CreateAsync(user, request.Password);
+        
+        if (!userCreateResult.Succeeded)
+            return Result<RegistrationResponseDTO>.Failure(userCreateResult.Errors);
 
-        var result = await _userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded)
-        {
-            return new AuthResponse
-            {
-                Success = false,
-                Errors = result.Errors.Select(e => e.Description).ToList()
-            };
-        }
-
+        user.RefreshToken = _jwtService.GenerateRefreshToken();
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         var token = _jwtService.GenerateJwtToken(user);
-        await _userManager.UpdateAsync(user);
 
-        return new AuthResponse
+        var userUpdateResult = await _userManager.UpdateAsync(user);
+
+        if (!userUpdateResult.Succeeded)
+            return Result<RegistrationResponseDTO>.Failure(userUpdateResult.Errors);
+
+        return Result<RegistrationResponseDTO>.Success(new RegistrationResponseDTO
         {
-            Success = true,
             Token = token,
             RefreshToken = user.RefreshToken,
             Message = "User registered successfully."
-        };
+        });
     }
 
 

@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Domain.Helpers;
+using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,7 +13,7 @@ namespace Domain.Сommon.Wrappers
     {
         public T? Value { get; }
 
-        public CustomExceptionType Error { get; }
+        public List<string> Errors { get; }
 
         public bool IsSuccess { get; }
 
@@ -20,18 +23,48 @@ namespace Domain.Сommon.Wrappers
         {
             Value = value;
             IsSuccess = true;
-            Error = CustomExceptionType.None;
+            Errors = new();
         }
 
-        private Result(CustomExceptionType error)
+        private Result(Exception error)
         {
-            Error = error;
+            Errors = new();
+            IsSuccess = false;
+            Value = default;
+            Errors.Add(error.Message.ToString());
+        }
+
+        private Result(List<Exception> errors)
+        {
+            Errors = errors.Select(e => e.Message).ToList();
+            IsSuccess = false;
+            Value = default;
+        }
+
+        private Result(IEnumerable<IdentityError> errors)
+        {
+            Errors = errors.Select(e => e.Description).ToList();
+            IsSuccess = false;
+            Value = default;
+        }
+
+        private Result(IdentityError error)
+        {
+            Errors = new() { error.Description };
             IsSuccess = false;
             Value = default;
         }
 
         public static Result<T> Success(T value) => new(value);
 
-        public static Result<T> Failure(CustomExceptionType error) => new(error);
+        public static Result<T> Failure(Exception error) => new(error);
+
+        public static Result<T> Failure(List<Exception> errors) => new(errors);
+
+        public static Result<T> Failure(IEnumerable<IdentityError> errors) => new(errors);
+
+        public static Result<T> Failure(IdentityError error) => new(error);
+
+        public ErrorResponse ToErrorResponse() => new ErrorResponse { Errors = this.Errors };
     }
 }

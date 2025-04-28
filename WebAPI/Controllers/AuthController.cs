@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using WebAPI.Extentions;
 
 namespace WebAPI
 {
@@ -23,8 +24,7 @@ namespace WebAPI
         public async Task<IActionResult> Register([FromBody][Required] RegistrationDTO request)
         {
             var result = await _authService.RegisterAsync(request);
-            if (!result.Success) return BadRequest(result);
-            return Ok(result);
+            return result.ToResponse();
         }
 
         [AllowAnonymous]
