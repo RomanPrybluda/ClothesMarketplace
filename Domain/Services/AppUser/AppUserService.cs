@@ -14,19 +14,13 @@ public class AppUserService(UserRepository _userRepository, IMapper _mapper)
 {
     public async Task<PagedResult<AppUserDTO>> GetAllUsersAsync(int page, int pageSize)
     {
-        List<AppUserDTO> userDTOs = new();
-
         var users = await _userRepository.GetUsersAsync(page, pageSize);
         var totalUsers = await _userRepository.GetUserCount();
 
-        if (users == null || !users.Any())
+        if (users?.Any() != true)
             throw new CustomException(CustomExceptionType.NotFound, "No users found.");
 
-        foreach (var user in users)
-        {
-            var userDTO = _mapper.Map<AppUserDTO>(user);
-            userDTOs.Add(userDTO);
-        }
+        var userDTOs = _mapper.Map<List<AppUserDTO>>(users);
 
         return new PagedResult<AppUserDTO> { Items = userDTOs, TotalCount = totalUsers };
     }
