@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Сommon.Wrappers
+﻿namespace Domain.Сommon.Wrappers
 {
     public class ValidationSummary(List<Exception> ExceptionsList)
     {

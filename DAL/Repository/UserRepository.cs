@@ -1,10 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DAL.Repository
 {
@@ -52,7 +47,7 @@ namespace DAL.Repository
         public async Task<IdentityResult> DeleteUserAsync(string userId)
         {
             var user = await FindByIdAsync(userId);
-            
+
             if (user != null)
                 return await userManager.DeleteAsync(user);
 

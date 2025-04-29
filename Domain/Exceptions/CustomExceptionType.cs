@@ -11,6 +11,7 @@
         ProductAlreadyExists = 7,
         InvalidData = 8,
         PasswordsDoNotMatch = 11,
-        FaildToAddRoleToUser = 12
+        FaildToAddRoleToUser = 12,
+        InvalidPassword = 13
     }
 }

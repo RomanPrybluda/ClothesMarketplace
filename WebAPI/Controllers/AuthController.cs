@@ -32,8 +32,7 @@ namespace WebAPI
         public async Task<IActionResult> Login([FromBody][Required] LoginDTO request)
         {
             var result = await _authService.LoginAsync(request);
-            if (!result.Success) return Unauthorized(result);
-            return Ok(result);
+            return result.ToResponse();
         }
 
         [Authorize]

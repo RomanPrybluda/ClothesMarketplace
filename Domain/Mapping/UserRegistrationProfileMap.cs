@@ -1,16 +1,11 @@
 ﻿using AutoMapper;
 using DAL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Mapping
 {
     public class UserRegistrationProfileMap : Profile
     {
-        public UserRegistrationProfileMap() 
+        public UserRegistrationProfileMap()
         {
             CreateMap<RegistrationDTO, AppUser>()
                 .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))

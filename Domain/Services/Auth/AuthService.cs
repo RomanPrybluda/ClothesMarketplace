@@ -22,7 +22,7 @@ public class AuthService(
     {
         var validationResult = await authValidator.ValidateRegistrationDto(request);
 
-        if(!validationResult.IsValid)
+        if (!validationResult.IsValid)
             return Result<RegistrationResponseDTO>.Failure(validationResult.GetExceptionsList());
 
         var user = mapper.Map<AppUser>(request);
@@ -43,18 +43,13 @@ public class AuthService(
     }
 
 
-    public async Task<AuthResponse> LoginAsync(LoginDTO request)
+    public async Task<Result<LoginResponseDTO>> LoginAsync(LoginDTO request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
-        {
-            return new AuthResponse { Success = false, Message = "Invalid credentials" };
-        }
+        var validationResult = await authValidator.ValidateLoginDto(request);
 
-        /*   if (!await _userManager.IsEmailConfirmedAsync(user))
-           {
-               return new AuthResponse { Success = false, Message = "Email is not confirmed" };
-        }  */
+        if (!validationResult.IsValid)
+            return Result<LoginResponseDTO>.Failure(validationResult.GetExceptionsList());
 
         var token = _jwtService.GenerateJwtToken(user);
         var refreshToken = _jwtService.GenerateRefreshToken();
@@ -63,10 +58,14 @@ public class AuthService(
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _userManager.UpdateAsync(user);
 
-        return new AuthResponse { Success = true, Token = token, RefreshToken = refreshToken };
+        return Result<LoginResponseDTO>.Success(new LoginResponseDTO
+        {
+            Success = true,
+            Token = token,
+            RefreshToken = refreshToken,
+            Message = "Signed in successfully."
+        });
     }
-
-
 
     public async Task<bool> ConfirmEmailAsync(string userId, string token)
     {

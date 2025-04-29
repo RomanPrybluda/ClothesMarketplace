@@ -1,14 +1,9 @@
 using AutoMapper;
-using Azure.Core;
 using DAL;
-using DAL.Models;
 using DAL.Repository;
 using Domain;
-using Domain.Services.Auth.DTO;
 using Domain.Ñommon.Wrappers;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Net.WebSockets;
 
 public class AppUserService(UserRepository _userRepository, IMapper _mapper)
 {
