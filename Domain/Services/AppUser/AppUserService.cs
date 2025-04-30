@@ -23,6 +23,7 @@ public class AppUserService(UserRepository _userRepository, IMapper _mapper)
     public async Task<AppUserDTO> GetUserByIdAsync(string id)
     {
         var userById = await _userRepository.FindByIdAsync(id);
+
         if (userById == null)
             throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
 
