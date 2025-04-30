@@ -1,98 +1,94 @@
+using AutoMapper;
 using DAL;
+using DAL.Repository;
 using Domain;
-using Microsoft.EntityFrameworkCore;
+using Domain.Сommon.Wrappers;
+using Microsoft.AspNetCore.Identity;
 
-public class AppUserService
+public class AppUserService(UserRepository _userRepository, IMapper _mapper)
 {
-    private readonly ClothesMarketplaceDbContext _context;
-
-    public AppUserService(ClothesMarketplaceDbContext context)
-    {
-        _context = context;
-    }
-
     public async Task<PagedResult<AppUserDTO>> GetAllUsersAsync(int page, int pageSize)
     {
-        var query = _context.Users.Select(u => new AppUserDTO
-        {
-            Id = u.Id,
-            UserName = u.UserName,
-            Email = u.Email
-        });
+        var users = await _userRepository.GetUsersAsync(page, pageSize);
+        var totalUsers = await _userRepository.GetUserCount();
 
-        var totalUsers = await query.CountAsync();
-        var users = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+        if (users?.Any() != true)
+            throw new CustomException(CustomExceptionType.NotFound, "No users found.");
 
-        return new PagedResult<AppUserDTO> { Items = users, TotalCount = totalUsers };
+        var userDTOs = _mapper.Map<List<AppUserDTO>>(users);
+
+        return new PagedResult<AppUserDTO> { Items = userDTOs, TotalCount = totalUsers };
     }
 
-    public async Task<AppUserDTO?> GetUserByIdAsync(Guid id)
+    public async Task<AppUserDTO> GetUserByIdAsync(string id)
     {
-        var userById = await _context.AppUsers.FindAsync(id);
+        var userById = await _userRepository.FindByIdAsync(id);
         if (userById == null)
             throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
 
-        var userDTO = AppUserDTO.FromAppUser(userById);
+        var response = _mapper.Map<AppUserDTO>(userById);
 
-        return userDTO;
+        return response;
     }
 
-    public async Task<AppUserDTO?> GetUserByNameAsync(string userName)
+    public async Task<AppUserDTO> GetUserByNameAsync(string userName)
     {
-        var userByName = await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+        var userByName = await _userRepository.FindByNameAsync(userName);
         if (userByName == null)
             throw new CustomException(CustomExceptionType.NotFound, $"No user found with username {userName}");
 
-        var userDTO = AppUserDTO.FromAppUser(userByName);
+        var response = _mapper.Map<AppUserDTO>(userByName);
 
-        return userDTO;
+        return response;
     }
 
-    public async Task<AppUserDTO> CreateCategoryAsync(CreateAppUserDTO request)
+    public async Task<Result<AppUserDTO>> CreateUserAsync(AppUser appUser, string password, IdentityRole userRole)
     {
-        var existingAppUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.UserName == request.UserName);
+        var existingAppUser = await _userRepository.FindByEmailAsync(appUser.Email);
 
         if (existingAppUser != null)
-            throw new CustomException(CustomExceptionType.IsAlreadyExists, $"User '{request.UserName}' already exists.");
+            throw new CustomException(CustomExceptionType.IsAlreadyExists, $"User '{appUser.UserName}' already exists.");
 
-        var user = CreateAppUserDTO.ToAppUser(request);
+        var userCreateResult = await _userRepository.CreateUserAsync(appUser, password);
 
-        _context.AppUsers.Add(user);
-        await _context.SaveChangesAsync();
+        if (!userCreateResult.Succeeded)
+            return Result<AppUserDTO>.Failure(userCreateResult.Errors);
 
-        var newAppUser = await _context.AppUsers.FindAsync(user.Id);
-        var userDTO = AppUserDTO.FromAppUser(newAppUser);
+        var userRoleResult = await _userRepository.AddToRoleAsync(appUser, userRole.Name);
 
-        return userDTO;
+        if (!userRoleResult.Succeeded)
+            throw new CustomException(CustomExceptionType.FaildToAddRoleToUser, $"Failed to add user '{appUser.UserName}' to role '{userRole.Name}'.");
+
+        var newAppUser = await _userRepository.FindByEmailAsync(appUser.Email);
+        var response = _mapper.Map<AppUserDTO>(newAppUser);
+
+        return Result<AppUserDTO>.Success(response);
     }
 
-    public async Task<AppUserDTO?> UpdateUserAsync(Guid id, UpdateAppUserDTO request)
+    public async Task<AppUserDTO> UpdateUserAsync(string id, AppUser userForUpdate)
     {
-        var user = await _context.AppUsers.FindAsync(id);
+        var existingUser = await _userRepository.FindByIdAsync(id);
 
-        if (user == null)
-        {
+        if (existingUser == null)
             throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
-        }
-        request.UpdateAppUser(user);
 
-        _context.AppUsers.Update(user);
-        await _context.SaveChangesAsync();
+        var user = _mapper.Map<AppUser>(userForUpdate);
+        var result = await _userRepository.UpdateUserAsync(user);
 
-        var userDTO = AppUserDTO.FromAppUser(user);
+        if (!result.Succeeded)
+            throw new CustomException(CustomExceptionType.InternalError, $"Failed to update user with ID {id}");
 
-        return userDTO;
+        var updatedUser = await _userRepository.FindByIdAsync(id);
+        var response = _mapper.Map<AppUserDTO>(updatedUser);
+
+        return response;
     }
 
     public async Task DeleteUserAsync(string id)
     {
-        var user = await _context.AppUsers.FindAsync(id);
-        if (user == null)
-        {
-            throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
-        }
+        var user = await _userRepository.DeleteUserAsync(id);
 
-        _context.AppUsers.Remove(user);
-        await _context.SaveChangesAsync();
+        if (!user.Succeeded)
+            throw new CustomException(CustomExceptionType.NotFound, $"No user found with ID {id}");
     }
 }

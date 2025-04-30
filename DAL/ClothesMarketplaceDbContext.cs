@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using DAL.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +38,8 @@ namespace DAL
         {
             builder.ApplyConfigurationsFromAssembly(typeof(ClothesMarketplaceDbContext).Assembly);
             base.OnModelCreating(builder);
+
+            builder.Entity<IdentityRole>().HasData(RoleRegistry.Admin, RoleRegistry.User);
         }
     }
 }

@@ -1,7 +1,9 @@
 using DAL;
+using DAL.Repository;
 using Domain;
 using Domain.Abstractions;
 using Domain.Helpers;
+using Domain.Mapping;
 using Domain.Services.Brand;
 using Domain.Services.Images;
 using Domain.Validators;
@@ -129,6 +131,9 @@ builder.Services.AddScoped<FavoriteProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 builder.Services.AddScoped<BrandService>();
+builder.Services.AddScoped<AuthValidator>();
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddAutoMapper(typeof(UserRegistrationProfileMap));
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();

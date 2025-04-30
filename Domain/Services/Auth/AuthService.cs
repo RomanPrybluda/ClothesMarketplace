@@ -1,4 +1,9 @@
-﻿using DAL;
+﻿using AutoMapper;
+using DAL;
+using DAL.Models;
+using Domain.Services.Auth.DTO;
+using Domain.Validators;
+using Domain.Сommon.Wrappers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,71 +12,44 @@ namespace Domain;
 public class AuthService(
     UserManager<AppUser> _userManager,
     JwtService _jwtService,
-    EmailService _emailService)
+    EmailService _emailService,
+    AuthValidator authValidator,
+    IMapper mapper,
+    AppUserService _userService)
 {
-    public async Task<AuthResponse> RegisterAsync(RegistrationDTO request)
+
+    public async Task<Result<RegistrationResponseDTO>> RegisterAsync(RegistrationDTO request)
     {
-        var existingUser = await _userManager.FindByEmailAsync(request.Email);
-        if (existingUser != null)
-        {
-            return new AuthResponse { Success = false, Errors = ["Email is already taken."] };
-        }
+        var validationResult = await authValidator.ValidateRegistrationDto(request);
 
-        if (await _userManager.FindByNameAsync(request.UserName) != null)
-        {
-            return new AuthResponse { Success = false, Errors = ["Username is already taken."] };
-        }
+        if (!validationResult.IsValid)
+            return Result<RegistrationResponseDTO>.Failure(validationResult.GetExceptionsList());
 
-        if (request.Password != request.ConfirmPassword)
-        {
-            return new AuthResponse { Success = false, Errors = ["Passwords do not match."] };
-        }
+        var user = mapper.Map<AppUser>(request);
+        await _userService.CreateUserAsync(user, request.Password, RoleRegistry.User);
 
-        var user = new AppUser
-        {
-            UserName = request.UserName,
-            Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            RefreshToken = _jwtService.GenerateRefreshToken(),
-            RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7) // например, 7 дней
-        };
-
-        var result = await _userManager.CreateAsync(user, request.Password);
-        if (!result.Succeeded)
-        {
-            return new AuthResponse
-            {
-                Success = false,
-                Errors = result.Errors.Select(e => e.Description).ToList()
-            };
-        }
-
+        user.RefreshToken = _jwtService.GenerateRefreshToken();
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         var token = _jwtService.GenerateJwtToken(user);
-        await _userManager.UpdateAsync(user);
 
-        return new AuthResponse
+        await _userService.UpdateUserAsync(user.Id, user);
+
+        return Result<RegistrationResponseDTO>.Success(new RegistrationResponseDTO
         {
-            Success = true,
             Token = token,
             RefreshToken = user.RefreshToken,
             Message = "User registered successfully."
-        };
+        });
     }
 
 
-    public async Task<AuthResponse> LoginAsync(LoginDTO request)
+    public async Task<Result<LoginResponseDTO>> LoginAsync(LoginDTO request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
-        if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
-        {
-            return new AuthResponse { Success = false, Message = "Invalid credentials" };
-        }
+        var validationResult = await authValidator.ValidateLoginDto(request);
 
-        /*   if (!await _userManager.IsEmailConfirmedAsync(user))
-           {
-               return new AuthResponse { Success = false, Message = "Email is not confirmed" };
-        }  */
+        if (!validationResult.IsValid)
+            return Result<LoginResponseDTO>.Failure(validationResult.GetExceptionsList());
 
         var token = _jwtService.GenerateJwtToken(user);
         var refreshToken = _jwtService.GenerateRefreshToken();
@@ -80,10 +58,14 @@ public class AuthService(
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _userManager.UpdateAsync(user);
 
-        return new AuthResponse { Success = true, Token = token, RefreshToken = refreshToken };
+        return Result<LoginResponseDTO>.Success(new LoginResponseDTO
+        {
+            Success = true,
+            Token = token,
+            RefreshToken = refreshToken,
+            Message = "Signed in successfully."
+        });
     }
-
-
 
     public async Task<bool> ConfirmEmailAsync(string userId, string token)
     {

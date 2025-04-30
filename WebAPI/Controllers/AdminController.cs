@@ -28,7 +28,7 @@ public class AdminController : ControllerBase
     [HttpDelete("{id:Guid}")]
     public async Task<IActionResult> DeleteUser([Required] Guid id)
     {
-        await _userService.GetUserByIdAsync(id);
+        await _userService.GetUserByIdAsync(id.ToString());
         return NoContent();
     }
 
@@ -36,7 +36,7 @@ public class AdminController : ControllerBase
     [HttpGet("{id:Guid}")]
     public async Task<ActionResult<AppUser>> GetUser([Required] Guid id)
     {
-        var user = await _userService.GetUserByIdAsync(id);
+        var user = await _userService.GetUserByIdAsync(id.ToString());
         return Ok(user);
     }
 }
