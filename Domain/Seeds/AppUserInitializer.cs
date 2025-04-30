@@ -40,7 +40,7 @@ namespace Domain
                         EmailConfirmed = true
                     };
 
-                    var createResult = _userManager.CreateAsync(newUser, "User123!").Result;
+                    var createResult = _userManager.CreateAsync(newUser, "User123123123!").Result;
 
                     if (createResult.Succeeded)
                     {
