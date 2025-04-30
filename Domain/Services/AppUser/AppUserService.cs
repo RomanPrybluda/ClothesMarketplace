@@ -35,6 +35,7 @@ public class AppUserService(UserRepository _userRepository, IMapper _mapper)
     public async Task<AppUserDTO> GetUserByNameAsync(string userName)
     {
         var userByName = await _userRepository.FindByNameAsync(userName);
+
         if (userByName == null)
             throw new CustomException(CustomExceptionType.NotFound, $"No user found with username {userName}");
 
