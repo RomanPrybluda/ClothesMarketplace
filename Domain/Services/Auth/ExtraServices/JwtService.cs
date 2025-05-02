@@ -21,8 +21,8 @@ public class JwtService(IConfiguration _configuration)
 
         var claims = new List<Claim>
         {
-            new Claim("userId", user.Id),
-            new Claim("email", user.Email ?? ""),
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Email, user.Email ?? ""),
             new Claim(ClaimTypes.Name, user.UserName ?? ""),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };

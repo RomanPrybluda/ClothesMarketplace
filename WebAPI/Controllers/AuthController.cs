@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Security.Claims;
 using WebAPI.Extentions;
 
@@ -40,7 +41,7 @@ namespace WebAPI
         public async Task<IActionResult> Logout()
         {
 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId =  User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var guid))
                 return Unauthorized();
