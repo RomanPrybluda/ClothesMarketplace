@@ -26,13 +26,12 @@ public class AuthService(
             return Result<RegistrationResponseDTO>.Failure(validationResult.GetExceptionsList());
 
         var user = mapper.Map<AppUser>(request);
-        await _userService.CreateUserAsync(user, request.Password, RoleRegistry.User);
-
         user.RefreshToken = _jwtService.GenerateRefreshToken();
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        
+        await _userService.CreateUserAsync(user, request.Password, RoleRegistry.User);;
+        
         var token = _jwtService.GenerateJwtToken(user);
-
-        await _userService.UpdateUserAsync(user.Id, user);
 
         return Result<RegistrationResponseDTO>.Success(new RegistrationResponseDTO
         {
