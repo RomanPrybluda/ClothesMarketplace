@@ -4,6 +4,7 @@ using Domain;
 using Domain.Abstractions;
 using Domain.Helpers;
 using Domain.Mapping;
+using Domain.Services.Auth.DTO;
 using Domain.Services.Brand;
 using Domain.Services.Images;
 using Domain.Validators;
@@ -26,6 +27,9 @@ var configuration = builder.Configuration;
 var connectionString = builder.Configuration.GetConnectionString("Default");
 
 var localConnectionString = builder.Configuration["ConnectionStrings:LocalConnectionString"];
+
+var jwtTokenOptions = new JwtTokenOptions();
+builder.Configuration.GetSection("JwtTokenOptions").Bind(jwtTokenOptions);
 
 if (!string.IsNullOrWhiteSpace(localConnectionString))
 {
@@ -110,14 +114,14 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidIssuer = configuration["Jwt:Issuer"],
+        ValidIssuer = jwtTokenOptions.Issuer,
 
         ValidateAudience = true,
-        ValidAudience = configuration["Jwt:Audience"],
+        ValidAudience = jwtTokenOptions.Audience,
 
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(configuration["Jwt:Key"])
+            Encoding.UTF8.GetBytes(jwtTokenOptions.Key)
         ),
         ValidateLifetime = true
     };
@@ -139,6 +143,8 @@ builder.Services.AddAutoMapper(typeof(UserRegistrationProfileMap));
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
+
+builder.Services.Configure<JwtTokenOptions>(configuration.GetSection("JwtTokenOptions"));
 
 builder.Logging.AddConsole();
 

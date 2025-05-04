@@ -1,4 +1,5 @@
-﻿using Domain;
+﻿using DAL.Models;
+using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -24,7 +25,8 @@ namespace WebAPI
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody][Required] RegistrationDTO request)
         {
-            var result = await _authService.RegisterAsync(request);
+            var userRole = RoleRegistry.User;
+            var result = await _authService.RegisterAsync(request, userRole);
             return result.ToResponse();
         }
 

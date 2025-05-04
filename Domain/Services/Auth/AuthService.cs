@@ -18,7 +18,7 @@ public class AuthService(
     AppUserService _userService)
 {
 
-    public async Task<Result<RegistrationResponseDTO>> RegisterAsync(RegistrationDTO request)
+    public async Task<Result<RegistrationResponseDTO>> RegisterAsync(RegistrationDTO request, IdentityRole userRole)
     {
         var validationResult = await authValidator.ValidateRegistrationDto(request);
 
@@ -29,9 +29,12 @@ public class AuthService(
         user.RefreshToken = _jwtService.GenerateRefreshToken();
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         
-        await _userService.CreateUserAsync(user, request.Password, RoleRegistry.User);;
-        
-        var token = _jwtService.GenerateJwtToken(user);
+        var userCreationResult = await _userService.CreateUserAsync(user, request.Password, userRole);
+
+        if (!userCreationResult.IsSuccess)
+            return Result<RegistrationResponseDTO>.Failure(userCreationResult.Errors);
+
+        var token = _jwtService.GenerateJwtToken(user, RoleRegistry.User.Name);
 
         return Result<RegistrationResponseDTO>.Success(new RegistrationResponseDTO
         {
@@ -45,12 +48,13 @@ public class AuthService(
     public async Task<Result<LoginResponseDTO>> LoginAsync(LoginDTO request)
     {
         var user = await _userManager.FindByEmailAsync(request.Email);
+        var userRoles = await _userManager.GetRolesAsync(user);
         var validationResult = await authValidator.ValidateLoginDto(request);
 
         if (!validationResult.IsValid)
             return Result<LoginResponseDTO>.Failure(validationResult.GetExceptionsList());
 
-        var token = _jwtService.GenerateJwtToken(user);
+        var token = _jwtService.GenerateJwtToken(user, userRoles.ToArray());
         var refreshToken = _jwtService.GenerateRefreshToken();
 
         user.RefreshToken = refreshToken;
@@ -107,7 +111,7 @@ public class AuthService(
             return new AuthResponse { Success = false, Message = "Invalid or expired refresh token" };
         }
 
-        var newJwt = _jwtService.GenerateJwtToken(user);
+        var newJwt = _jwtService.GenerateJwtToken(user, RoleRegistry.User.Name);
         var newRefresh = _jwtService.GenerateRefreshToken();
         user.RefreshToken = newRefresh;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
