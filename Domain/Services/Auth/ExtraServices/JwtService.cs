@@ -1,5 +1,9 @@
 ﻿using DAL;
+using DAL.Models;
+using Domain.Services.Auth.DTO;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -8,31 +12,33 @@ using System.Text;
 
 namespace Domain;
 
-public class JwtService(IConfiguration _configuration)
+public class JwtService
 {
-    public string GenerateJwtToken(AppUser user)
+    private readonly JwtTokenOptions _tokenOptions;
+    
+    public JwtService(IOptions<JwtTokenOptions> tokenOptions)
     {
-        var keyString = _configuration["Jwt:Key"];
-        if (string.IsNullOrEmpty(keyString) || Encoding.UTF8.GetByteCount(keyString) < 32)
-            throw new ArgumentException("JWT Secret Key must be at least 32 bytes long.");
+        _tokenOptions = tokenOptions.Value;
+    }
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
-        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    public string GenerateJwtToken(AppUser user, params string[] userRoles)
+    {
+        foreach (var role in userRoles)
+            if (!RoleRegistry.IsValidRole(role))
+                throw new CustomException(CustomExceptionType.InvalidData, "User role is invalid.");
 
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-            new Claim(ClaimTypes.Email, user.Email ?? ""),
-            new Claim(ClaimTypes.Name, user.UserName ?? ""),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+        if (user == null)
+            throw new CustomException(CustomExceptionType.InvalidData, "User cannot be null.");
+
+        var claims = GetClaims(user, userRoles);
+        var credentials = GetSigningCredentials();
 
         var token = new JwtSecurityToken(
-            _configuration["Jwt:Issuer"],
-            _configuration["Jwt:Audience"],
+            _tokenOptions.Issuer,
+            _tokenOptions.Audience,
             claims,
             expires: DateTime.UtcNow.AddMinutes(30),
-            signingCredentials: credentials
+            signingCredentials:credentials 
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
@@ -44,5 +50,32 @@ public class JwtService(IConfiguration _configuration)
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(bytes);
         return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+    }
+
+    private SigningCredentials GetSigningCredentials()
+    {
+        if (string.IsNullOrEmpty(_tokenOptions.Key) || Encoding.UTF8.GetByteCount(_tokenOptions.Key) < 32)
+            throw new ArgumentException("JWT Secret Key must be at least 32 bytes long.");
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_tokenOptions.Key));
+        return new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+    }
+
+    private List<Claim> GetClaims(AppUser user, params string[] userRoles)
+    {
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Name, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        foreach (var role in userRoles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        return claims;
     }
 }

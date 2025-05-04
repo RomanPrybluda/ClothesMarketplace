@@ -49,6 +49,13 @@ namespace Domain.Сommon.Wrappers
             Value = default;
         }
 
+        private Result(List<string> errors)
+        {
+            Errors = errors;
+            IsSuccess = false;
+            Value = default;
+        }
+
         public static Result<T> Success(T value) => new(value);
 
         public static Result<T> Failure(Exception error) => new(error);
@@ -58,6 +65,8 @@ namespace Domain.Сommon.Wrappers
         public static Result<T> Failure(IEnumerable<IdentityError> errors) => new(errors);
 
         public static Result<T> Failure(IdentityError error) => new(error);
+
+        public static Result<T> Failure(List<string> errors) => new(errors);
 
         public ErrorResponse ToErrorResponse() => new ErrorResponse { Errors = this.Errors };
     }

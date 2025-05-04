@@ -40,5 +40,10 @@ namespace DAL.Models
             }
             return roles;
         }
+
+        public static bool IsValidRole(string roleName)
+        {
+            return SupportedRoles.Any(role => role.Name.Equals(roleName, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }
