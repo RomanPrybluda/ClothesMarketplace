@@ -99,7 +99,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
-    options.Password.RequiredLength = 12;
+    options.Password.RequiredLength = 8;
 })
 .AddEntityFrameworkStores<ClothesMarketplaceDbContext>();
 
@@ -137,7 +137,6 @@ builder.Services.AddScoped<FavoriteProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 builder.Services.AddScoped<BrandService>();
-builder.Services.AddScoped<AuthValidator>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddAutoMapper(typeof(UserRegistrationProfileMap));
 

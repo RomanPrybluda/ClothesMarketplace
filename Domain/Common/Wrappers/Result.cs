@@ -1,5 +1,6 @@
 ﻿using Domain.Helpers;
 using Microsoft.AspNetCore.Identity;
+using System.Net;
 
 namespace Domain.Сommon.Wrappers
 {
@@ -56,6 +57,13 @@ namespace Domain.Сommon.Wrappers
             Value = default;
         }
 
+        private Result(List<FluentValidation.Results.ValidationFailure> errors)
+        {
+            Errors = errors.Select(e => e.ErrorMessage).ToList();
+            IsSuccess = false;
+            Value = default;
+        }
+
         public static Result<T> Success(T value) => new(value);
 
         public static Result<T> Failure(Exception error) => new(error);
@@ -67,6 +75,8 @@ namespace Domain.Сommon.Wrappers
         public static Result<T> Failure(IdentityError error) => new(error);
 
         public static Result<T> Failure(List<string> errors) => new(errors);
+
+        public static Result<T> Failure(List<FluentValidation.Results.ValidationFailure> errors) => new(errors);
 
         public ErrorResponse ToErrorResponse() => new ErrorResponse { Errors = this.Errors };
     }
