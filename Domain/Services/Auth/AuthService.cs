@@ -4,6 +4,7 @@ using DAL.Models;
 using Domain.Services.Auth.DTO;
 using Domain.Validators;
 using Domain.Сommon.Wrappers;
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,17 +14,18 @@ public class AuthService(
     UserManager<AppUser> _userManager,
     JwtService _jwtService,
     EmailService _emailService,
-    AuthValidator authValidator,
+    IValidator<LoginDTO> loginValidator,
     IMapper mapper,
-    AppUserService _userService)
+    AppUserService _userService,
+    IValidator<RegistrationDTO> registrationValidator)
 {
 
     public async Task<Result<RegistrationResponseDTO>> RegisterAsync(RegistrationDTO request, IdentityRole userRole)
     {
-        var validationResult = await authValidator.ValidateRegistrationDto(request);
+        var validationResult = await registrationValidator.ValidateAsync(request);
 
         if (!validationResult.IsValid)
-            return Result<RegistrationResponseDTO>.Failure(validationResult.GetExceptionsList());
+            return Result<RegistrationResponseDTO>.Failure(validationResult.Errors);
 
         var user = mapper.Map<AppUser>(request);
         user.RefreshToken = _jwtService.GenerateRefreshToken();
@@ -44,21 +46,20 @@ public class AuthService(
         });
     }
 
-
     public async Task<Result<LoginResponseDTO>> LoginAsync(LoginDTO request)
     {
+        var validationResult = await loginValidator.ValidateAsync(request);
+        
+        if (!validationResult.IsValid)
+            return Result<LoginResponseDTO>.Failure(validationResult.Errors);
+
         var user = await _userManager.FindByEmailAsync(request.Email);
         var userRoles = await _userManager.GetRolesAsync(user);
-        var validationResult = await authValidator.ValidateLoginDto(request);
-
-        if (!validationResult.IsValid)
-            return Result<LoginResponseDTO>.Failure(validationResult.GetExceptionsList());
-
         var token = _jwtService.GenerateJwtToken(user, userRoles.ToArray());
         var refreshToken = _jwtService.GenerateRefreshToken();
-
         user.RefreshToken = refreshToken;
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+
         await _userManager.UpdateAsync(user);
 
         return Result<LoginResponseDTO>.Success(new LoginResponseDTO
