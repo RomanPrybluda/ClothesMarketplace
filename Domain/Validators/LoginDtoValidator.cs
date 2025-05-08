@@ -31,7 +31,7 @@ namespace Domain.Validators
                 {
                     var user = await userManager.FindByEmailAsync(password);
                     var isValid = await userManager.CheckPasswordAsync(user, password);
-                    return isValid;
+                    return !isValid;
                 })
                 .WithMessage("Invalid password. Please check the password and try again")
                 .WhenAsync(async (x,cancellationTokjen) => await userRepository.FindByEmailAsync(x.Email) != null);
