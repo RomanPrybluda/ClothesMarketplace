@@ -13,7 +13,6 @@ namespace Domain;
 public class AuthService(
     UserManager<AppUser> _userManager,
     JwtService _jwtService,
-    EmailService _emailService,
     IValidator<LoginDTO> loginValidator,
     IMapper mapper,
     AppUserService _userService,
@@ -87,8 +86,6 @@ public class AuthService(
 
         var token = await _userManager.GeneratePasswordResetTokenAsync(user);
         var resetLink = $"https://your-app.com/reset-password?email={email}&token={Uri.EscapeDataString(token)}";
-
-        await _emailService.SendEmailAsync(user.Email, "Reset Password", $"Click here to reset your password: {resetLink}");
         return true;
     }
 

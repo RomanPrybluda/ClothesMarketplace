@@ -1,4 +1,5 @@
-﻿using ClothesMarketPlace.Infrastructure.Services.Email;
+﻿using ClothesMarketPlace.Infrastructure.Helpers;
+using ClothesMarketPlace.Infrastructure.Services.Email;
 using Domain.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -14,6 +15,7 @@ namespace ClothesMarketPlace.Infrastructure.Extensions
         public static IServiceCollection AddInfrastructure(this IServiceCollection services)
         {
             services.AddScoped<IEmailProvider, EmailProvider>();
+            services.AddScoped<IHtmlTemplatesReader, HtmlTemplatesReader>();
             return services;
         }
     }

@@ -7,6 +7,7 @@ using Domain.Common.DTOs;
 using Domain.Helpers;
 using Domain.Mapping;
 using Domain.Services.Auth.DTO;
+using Domain.Services.Auth.ExtraServices;
 using Domain.Services.Brand;
 using Domain.Services.Images;
 using Domain.Validators;
@@ -130,7 +131,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<AuthNotifier>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<CategoryService>();

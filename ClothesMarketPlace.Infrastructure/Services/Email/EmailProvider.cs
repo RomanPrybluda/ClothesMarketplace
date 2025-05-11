@@ -22,7 +22,7 @@ namespace ClothesMarketPlace.Infrastructure.Services.Email
             _settings = brevoSettings.Value;
         }
 
-        public void SendEmail(string receiverEmail, string receiverName, string subject, string message)
+        public string SendTextEmail(string receiverEmail, string receiverName, string subject, string text)
         {
             var config = new Configuration();
             config.AddApiKey("api-key", _settings.ApiKey);
@@ -34,10 +34,29 @@ namespace ClothesMarketPlace.Infrastructure.Services.Email
             sendSmtpEmailTos.Add(receiver);
 
             string htmlContent = null;
-            string textContent = message;
+            string textContent = text;
 
             var sendSmtpEmail = new SendSmtpEmail(sender, sendSmtpEmailTos, null, null, htmlContent, textContent, subject);
             CreateSmtpEmail result = apiInstance.SendTransacEmail(sendSmtpEmail);
+
+            return result.MessageId;
+        }
+
+        public string SendHtmlEmail(string receiverEmail, string receiverName, string subject, string htmlContent)
+        {
+            var config = new Configuration();
+            config.AddApiKey("api-key", _settings.ApiKey);
+            var apiInstance = new TransactionalEmailsApi(config);
+            SendSmtpEmailSender sender = new SendSmtpEmailSender(_settings.SenderName, _settings.SenderEmail);
+
+            SendSmtpEmailTo receiver = new SendSmtpEmailTo(receiverEmail, receiverName);
+            List<SendSmtpEmailTo> sendSmtpEmailTos = new List<SendSmtpEmailTo>();
+            sendSmtpEmailTos.Add(receiver);
+
+            var sendSmtpEmail = new SendSmtpEmail(sender, sendSmtpEmailTos, null, null, htmlContent, null, subject);
+            CreateSmtpEmail result = apiInstance.SendTransacEmail(sendSmtpEmail);
+            
+            return result.MessageId;
         }
     }
 }
