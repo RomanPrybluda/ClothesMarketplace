@@ -1,7 +1,9 @@
+using ClothesMarketPlace.Infrastructure.Extensions;
 using DAL;
 using DAL.Repository;
 using Domain;
 using Domain.Abstractions;
+using Domain.Common.DTOs;
 using Domain.Helpers;
 using Domain.Mapping;
 using Domain.Services.Auth.DTO;
@@ -16,6 +18,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using sib_api_v3_sdk.Client;
 using System.Text;
 using System.Text.Json.Serialization;
 using WebAPI;
@@ -138,12 +141,16 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<UserRepository>();
+
+builder.Services.AddInfrastructure();
+
 builder.Services.AddAutoMapper(typeof(UserRegistrationProfileMap));
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
 builder.Services.Configure<JwtTokenOptions>(configuration.GetSection("JwtTokenOptions"));
+builder.Services.Configure<BrevoApiSettings>(configuration.GetSection("BrevoApiSettings"));
 
 builder.Logging.AddConsole();
 

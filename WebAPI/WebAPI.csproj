@@ -15,12 +15,14 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Options" Version="9.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="sib_api_v3_sdk" Version="4.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ClothesMarketPlace.Infrastructure\ClothesMarketPlace.Infrastructure.csproj" />
     <ProjectReference Include="..\DAL\DAL.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>

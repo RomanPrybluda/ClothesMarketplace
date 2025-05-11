@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csp
 		{F9839AB7-F52F-43D7-B168-CC1BC981497C} = {F9839AB7-F52F-43D7-B168-CC1BC981497C}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClothesMarketPlace.Infrastructure", "ClothesMarketPlace.Infrastructure\ClothesMarketPlace.Infrastructure.csproj", "{CB28429A-3941-4580-A692-B3CECBD792BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{0463969D-2D54-4C65-87F8-56AFA3040056}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0463969D-2D54-4C65-87F8-56AFA3040056}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0463969D-2D54-4C65-87F8-56AFA3040056}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB28429A-3941-4580-A692-B3CECBD792BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB28429A-3941-4580-A692-B3CECBD792BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB28429A-3941-4580-A692-B3CECBD792BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB28429A-3941-4580-A692-B3CECBD792BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
