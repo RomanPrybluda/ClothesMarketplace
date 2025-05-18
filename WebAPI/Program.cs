@@ -139,10 +139,6 @@ builder.Services.AddScoped<FavoriteProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 builder.Services.AddScoped<BrandService>();
-builder.Services.AddScoped<ColorService>();
-builder.Services.AddScoped<ForWhomService>();
-builder.Services.AddScoped<ConditionService>();
-builder.Services.AddScoped<SizeService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddAutoMapper(typeof(UserRegistrationProfileMap));
 
