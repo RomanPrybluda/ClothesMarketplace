@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebAPI
+namespace WebAPI.Controllers
 {
     [ApiController]
     [Route("images")]

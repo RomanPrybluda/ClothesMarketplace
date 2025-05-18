@@ -8,10 +8,5 @@ namespace Domain
         public string Name { get; set; } = string.Empty;
 
         public IFormFile? Image { get; set; }
-
-        public void UpdateBrand(Brand brand)
-        {
-            brand.Name = Name;
-        }
     }
 }
