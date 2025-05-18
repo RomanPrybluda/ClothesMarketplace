@@ -8,9 +8,9 @@ namespace Domain.Validators
         {
             RuleFor(x => x.Name)
                 .NotEmpty()
-                .WithMessage("Value is required.")
+                .WithMessage("Name is required.")
                 .MaximumLength(100)
-                .WithMessage("Value must be less than 100 characters.");
+                .WithMessage("Name must be less than 100 characters.");
 
             RuleFor(x => x.Description)
                 .NotEmpty()
