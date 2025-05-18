@@ -56,7 +56,9 @@ namespace Domain.Services.Brand
             await _context.SaveChangesAsync();
 
             var createdBrand = await _context.Brands.FindAsync(brand.Id);
-            return BrandDTO.FromBrand(createdBrand);
+            var brandDTO = BrandDTO.FromBrand(createdBrand);
+
+            return brandDTO;
         }
 
         public async Task<BrandDTO> UpdateBrandAsync(Guid Id, UpdateBrandDTO request)
@@ -65,16 +67,18 @@ namespace Domain.Services.Brand
 
             if (existingBrand is null)
                 throw new CustomException(CustomExceptionType.NotFound, $"No brand found with ID {Id}");
+
             if (request.Image != null)
                 existingBrand.ImageName = await _imageService.UploadImageAsync(request.Image);
 
-            existingBrand.Name = request.Name;
-
+            request.UpdateBrand(existingBrand);
             _context.Update(existingBrand);
             await _context.SaveChangesAsync();
 
             var updatedBrand = await _context.Brands.FindAsync(existingBrand.Id);
-            return BrandDTO.FromBrand(updatedBrand);
+            var brandDTO = BrandDTO.FromBrand(updatedBrand);
+
+            return brandDTO;
         }
 
         public async Task DeleteBrandAsync(Guid Id)
