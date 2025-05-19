@@ -401,8 +401,13 @@ namespace DAL.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
+<<<<<<<< HEAD:DAL/Migrations/20250519002519_InitialMigration.cs
                     { "1be8c545-31a7-4c0e-9d9c-b5b1ca56245f", null, "User", "USER" },
                     { "2c305852-6d5c-48bb-b0d7-3e2fe145d8d0", null, "Admin", "ADMIN" }
+========
+                    { "fb4fd1b5-a9b6-474a-9241-1d4e236b1328", null, "User", "USER" },
+                    { "fd8ae6f6-13b2-455c-8639-52ed98a55203", null, "Admin", "ADMIN" }
+>>>>>>>> origin/feature/add-endpoints-for-get-ids:DAL/Migrations/20250518202150_InitialMigration.cs
                 });
 
             migrationBuilder.CreateIndex(

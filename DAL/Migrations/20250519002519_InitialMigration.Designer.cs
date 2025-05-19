@@ -12,7 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DAL.Migrations
 {
     [DbContext(typeof(ClothesMarketplaceDbContext))]
+<<<<<<<< HEAD:DAL/Migrations/20250519002519_InitialMigration.Designer.cs
     [Migration("20250519002519_InitialMigration")]
+========
+    [Migration("20250518202150_InitialMigration")]
+>>>>>>>> origin/feature/add-endpoints-for-get-ids:DAL/Migrations/20250518202150_InitialMigration.Designer.cs
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -433,13 +437,21 @@ namespace DAL.Migrations
                     b.HasData(
                         new
                         {
+<<<<<<<< HEAD:DAL/Migrations/20250519002519_InitialMigration.Designer.cs
                             Id = "2c305852-6d5c-48bb-b0d7-3e2fe145d8d0",
+========
+                            Id = "fd8ae6f6-13b2-455c-8639-52ed98a55203",
+>>>>>>>> origin/feature/add-endpoints-for-get-ids:DAL/Migrations/20250518202150_InitialMigration.Designer.cs
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
+<<<<<<<< HEAD:DAL/Migrations/20250519002519_InitialMigration.Designer.cs
                             Id = "1be8c545-31a7-4c0e-9d9c-b5b1ca56245f",
+========
+                            Id = "fb4fd1b5-a9b6-474a-9241-1d4e236b1328",
+>>>>>>>> origin/feature/add-endpoints-for-get-ids:DAL/Migrations/20250518202150_InitialMigration.Designer.cs
                             Name = "User",
                             NormalizedName = "USER"
                         });
