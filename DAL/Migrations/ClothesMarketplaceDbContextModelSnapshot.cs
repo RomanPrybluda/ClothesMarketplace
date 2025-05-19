@@ -430,13 +430,13 @@ namespace DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "14444524-944f-478e-964f-8b6308528e65",
+                            Id = "11ad8eb8-08b6-4e62-8c66-5d91064d4d1c",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "1ec411b3-9c1e-411a-bb38-fac959b0ddbe",
+                            Id = "dcc62711-3e0b-4682-b31c-253e4762cb28",
                             Name = "User",
                             NormalizedName = "USER"
                         });
