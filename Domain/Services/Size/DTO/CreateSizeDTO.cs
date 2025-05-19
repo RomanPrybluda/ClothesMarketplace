@@ -11,7 +11,7 @@ namespace Domain
             return new ProductSize
             {
                 Id = Guid.NewGuid(),
-                Value = dto.Name
+                Name = dto.Name
             };
         }
     }

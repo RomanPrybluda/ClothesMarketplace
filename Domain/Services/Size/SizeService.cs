@@ -44,7 +44,7 @@ namespace Domain
 
         public async Task<SizeDTO> CreateSizeAsync(CreateSizeDTO request)
         {
-            var existingSize = await _context.ProductSizes.AnyAsync(s => s.Value.ToLower() == request.Name.ToLower());
+            var existingSize = await _context.ProductSizes.AnyAsync(s => s.Name.ToLower() == request.Name.ToLower());
 
             if (existingSize)
                 throw new CustomException(CustomExceptionType.IsAlreadyExists, $"Size '{request.Name}' already exists.");
@@ -67,7 +67,7 @@ namespace Domain
             if (existingSize == null)
                 throw new CustomException(CustomExceptionType.NotFound, $"Size with ID {id} not found.");
 
-            existingSize.Value = request.Name;
+            existingSize.Name = request.Name;
             _context.ProductSizes.Update(existingSize);
             await _context.SaveChangesAsync();
 

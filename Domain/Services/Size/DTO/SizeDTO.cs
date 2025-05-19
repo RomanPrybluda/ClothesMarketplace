@@ -13,7 +13,7 @@ namespace Domain
             return new SizeDTO
             {
                 Id = size.Id,
-                Name = size.Value
+                Name = size.Name
             };
         }
     }

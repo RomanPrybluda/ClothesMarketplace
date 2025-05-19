@@ -8,7 +8,7 @@ namespace Domain.Services.Size.DTO
 
         public void UpdateSize(ProductSize size)
         {
-            size.Value = Name;
+            size.Name = Name;
         }
     }
 }
