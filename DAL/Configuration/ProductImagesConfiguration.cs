@@ -8,6 +8,7 @@ namespace DAL
         public void Configure(EntityTypeBuilder<Image> builder)
         {
             builder.HasKey(pi => pi.Id);
+
             builder.Property(pi => pi.Id)
                 .HasDefaultValueSql("NEWID()")
                 .ValueGeneratedOnAdd();

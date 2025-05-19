@@ -12,6 +12,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.IdentityModel.Tokens;
@@ -28,9 +29,6 @@ var connectionString = builder.Configuration.GetConnectionString("Default");
 
 var localConnectionString = builder.Configuration["ConnectionStrings:LocalConnectionString"];
 
-var jwtTokenOptions = new JwtTokenOptions();
-builder.Configuration.GetSection("JwtTokenOptions").Bind(jwtTokenOptions);
-
 if (!string.IsNullOrWhiteSpace(localConnectionString))
 {
     connectionString = localConnectionString;
@@ -40,6 +38,9 @@ if (string.IsNullOrWhiteSpace(connectionString))
 {
     throw new InvalidOperationException("Connection string is not set. Check environment variables, appsettings.json, or secrets.");
 }
+
+var jwtTokenOptions = new JwtTokenOptions();
+builder.Configuration.GetSection("JwtTokenOptions").Bind(jwtTokenOptions);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -91,6 +92,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
 {
     options.UseSqlServer(connectionString, b => b.MigrationsAssembly("DAL"));
+    options.ConfigureWarnings(x => x.Ignore(RelationalEventId.PendingModelChangesWarning));
 });
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -169,9 +171,9 @@ using (var scope = app.Services.CreateScope())
     var pendingMigrations = context.Database.GetPendingMigrations().ToList();
 
     if (!appliedMigrations.Any())
-
+    {
         context.Database.Migrate();
-
+    }
     else if (pendingMigrations.Any())
     {
         foreach (var migration in pendingMigrations)
