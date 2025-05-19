@@ -13,9 +13,9 @@ namespace DAL
                 .HasDefaultValueSql("NEWID()")
                 .ValueGeneratedOnAdd();
 
-            builder.Property(ps => ps.Value)
+            builder.Property(ps => ps.Name)
                 .IsRequired()
-                .HasMaxLength(50);
+                .HasMaxLength(20);
 
             builder.HasMany(ps => ps.Products)
                 .WithOne(p => p.ProductSize)

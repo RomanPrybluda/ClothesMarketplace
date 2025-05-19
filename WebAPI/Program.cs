@@ -12,6 +12,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.IdentityModel.Tokens;
@@ -91,6 +92,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<ClothesMarketplaceDbContext>(options =>
 {
     options.UseSqlServer(connectionString, b => b.MigrationsAssembly("DAL"));
+    options.ConfigureWarnings(x => x.Ignore(RelationalEventId.PendingModelChangesWarning));
 });
 
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>

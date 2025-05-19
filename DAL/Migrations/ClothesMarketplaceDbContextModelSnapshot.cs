@@ -391,10 +391,10 @@ namespace DAL.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<string>("Value")
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
 
@@ -430,13 +430,13 @@ namespace DAL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "830a611f-f3cf-46af-8c05-aa0eb3f4f8b5",
+                            Id = "2c305852-6d5c-48bb-b0d7-3e2fe145d8d0",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "44517ed3-d0cb-452e-8e63-ff60e91a6afb",
+                            Id = "1be8c545-31a7-4c0e-9d9c-b5b1ca56245f",
                             Name = "User",
                             NormalizedName = "USER"
                         });

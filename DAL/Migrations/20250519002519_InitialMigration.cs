@@ -136,7 +136,7 @@ namespace DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWID()"),
-                    Value = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -401,8 +401,8 @@ namespace DAL.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "44517ed3-d0cb-452e-8e63-ff60e91a6afb", null, "User", "USER" },
-                    { "830a611f-f3cf-46af-8c05-aa0eb3f4f8b5", null, "Admin", "ADMIN" }
+                    { "1be8c545-31a7-4c0e-9d9c-b5b1ca56245f", null, "User", "USER" },
+                    { "2c305852-6d5c-48bb-b0d7-3e2fe145d8d0", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(

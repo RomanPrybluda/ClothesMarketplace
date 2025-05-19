@@ -8,6 +8,7 @@ namespace DAL
         public void Configure(EntityTypeBuilder<ProductDetails> builder)
         {
             builder.HasKey(d => d.Id);
+
             builder.Property(d => d.Id)
                 .HasDefaultValueSql("NEWID()")
                 .ValueGeneratedOnAdd();
