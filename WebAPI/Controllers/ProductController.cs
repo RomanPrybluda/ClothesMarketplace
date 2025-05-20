@@ -25,6 +25,14 @@ namespace WebAPI
             return Ok(result);
         }
 
+        [HttpGet("latest")]
+        public async Task<ActionResult<List<ProductDTO>>> GetLatestProductsAsync([Required] int quantity)
+        {
+            var latestProducts = await _productService.GetLatestProductsAsync(quantity);
+            return Ok(latestProducts);
+        }
+
+
         [HttpGet("{id:Guid}")]
         public async Task<ActionResult> GetProductByIdAsync([Required] Guid id)
         {
