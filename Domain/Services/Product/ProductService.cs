@@ -87,6 +87,24 @@ namespace Domain
             );
         }
 
+        public async Task<List<ProductDTO>> GetLatestProductsAsync(int quantity)
+        {
+            var products = await _context.Products
+                .Include(p => p.ProductDetails)
+                .OrderByDescending(p => p.ProductDetails!.CreatedAt)
+                .Take(quantity)
+                .ToListAsync();
+
+            List<ProductDTO> productDTOs = new();
+            foreach (var product in products)
+            {
+                var productDTO = ProductDTO.FromProduct(product);
+                productDTOs.Add(productDTO);
+            }
+
+            return productDTOs;
+        }
+
         public async Task<ProductByIdDTO> GetProductByIdAsync(Guid id)
         {
             var productById = await _context.Products.FindAsync(id);
