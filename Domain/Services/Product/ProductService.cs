@@ -95,10 +95,34 @@ namespace Domain
                 .Take(quantity)
                 .ToListAsync();
 
+            if (products == null || products.Count == 0)
+                throw new CustomException(CustomExceptionType.NotFound, $"Latest added products not found");
+
             List<ProductDTO> productDTOs = new();
             foreach (var product in products)
             {
                 var productDTO = ProductDTO.FromProduct(product);
+                productDTOs.Add(productDTO);
+            }
+
+            return productDTOs;
+        }
+
+        public async Task<List<PopularProductDTO>> GetPopularProductsAsync(int quantity)
+        {
+            var products = await _context.Products
+                .Where(p => p.ProductDetails != null && p.ProductDetails.IsActive)
+                .OrderByDescending(p => p.LikesCount)
+                .Take(quantity)
+                .ToListAsync();
+
+            if (products == null || products.Count == 0)
+                throw new CustomException(CustomExceptionType.NotFound, $"Popular products not found");
+
+            List<PopularProductDTO> productDTOs = new();
+            foreach (var product in products)
+            {
+                var productDTO = PopularProductDTO.FromProduct(product);
                 productDTOs.Add(productDTO);
             }
 
