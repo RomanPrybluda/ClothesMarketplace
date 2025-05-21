@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Domain.Validators
+namespace Domain
 {
     public class CreateProductDtoValidator : AbstractValidator<CreateProductDTO>
     {

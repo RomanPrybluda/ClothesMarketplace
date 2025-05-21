@@ -1,12 +1,11 @@
-﻿using Bogus.Extensions.UnitedKingdom;
-using Domain.Abstractions;
+﻿using Domain.Abstractions;
 using Domain.Helpers;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using SixLabors.ImageSharp;
 
-namespace Domain.Services.Images
+namespace Domain
 {
     public class ImageService : IImageService
     {

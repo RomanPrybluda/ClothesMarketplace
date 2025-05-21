@@ -7,7 +7,7 @@ namespace Domain
 {
     public static class QuartzConfig
     {
-        public static async void ConfigureQuartz(this IServiceCollection services)
+        public static void ConfigureQuartz(this IServiceCollection services)
         {
 
             services.AddSingleton<ImageCleanupService>();

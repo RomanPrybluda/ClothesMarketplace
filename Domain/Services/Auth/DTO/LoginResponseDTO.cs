@@ -1,4 +1,4 @@
-﻿namespace Domain.Services.Auth.DTO
+﻿namespace Domain
 {
     public record LoginResponseDTO
     {

@@ -26,47 +26,40 @@ namespace Domain
             {
                 var dbImageNames = new HashSet<string>();
 
-                // Collect image names from Images table (related to Products)
                 var productImages = await _context.ProductImages
                     .Where(i => !string.IsNullOrEmpty(i.ImageName))
-                    .Select(i => i.ImageName) // No Path.GetFileName since DB stores name without extension
+                    .Select(i => i.ImageName)
                     .ToListAsync();
                 dbImageNames.UnionWith(productImages);
 
-                // Collect image names from Category
                 var categoryImages = await _context.Categories
                     .Where(c => !string.IsNullOrEmpty(c.ImageName))
-                    .Select(c => c.ImageName) // No Path.GetFileName since DB stores name without extension
+                    .Select(c => c.ImageName)
                     .ToListAsync();
                 dbImageNames.UnionWith(categoryImages);
 
-                // Collect image names from Brand
                 var brandImages = await _context.Brands
                     .Where(b => !string.IsNullOrEmpty(b.ImageName))
-                    .Select(b => b.ImageName) // No Path.GetFileName since DB stores name without extension
+                    .Select(b => b.ImageName)
                     .ToListAsync();
                 dbImageNames.UnionWith(brandImages);
 
-                // Check if images directory exists
                 if (!Directory.Exists(_imagesPath))
                 {
                     Console.WriteLine("Images directory does not exist.");
                     return;
                 }
 
-                // Get list of files on server (without extensions for comparison)
                 var serverImageNames = Directory
                     .GetFiles(_imagesPath)
                     .Select(Path.GetFileNameWithoutExtension)
                     .ToList();
 
-                // Find files to delete (compare without extensions)
                 var filesToDelete = Directory
                     .GetFiles(_imagesPath)
                     .Where(file => !dbImageNames.Contains(Path.GetFileNameWithoutExtension(file)))
                     .ToList();
 
-                // Delete files
                 foreach (var file in filesToDelete)
                 {
                     var filePath = Path.Combine(_imagesPath, Path.GetFileName(file));

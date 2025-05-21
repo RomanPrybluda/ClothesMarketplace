@@ -9,7 +9,9 @@ namespace Domain
         private readonly IEnumerable<JobMetadata> _jobMetadata;
         private IScheduler _scheduler;
 
-        public QuartzHostedService(ISchedulerFactory schedulerFactory, IEnumerable<JobMetadata> jobMetadata)
+        public QuartzHostedService(
+            ISchedulerFactory schedulerFactory,
+            IEnumerable<JobMetadata> jobMetadata)
         {
             _schedulerFactory = schedulerFactory;
             _jobMetadata = jobMetadata;

@@ -1,5 +1,4 @@
 ﻿using DAL;
-using Domain.Services.Size.DTO;
 using Microsoft.EntityFrameworkCore;
 
 namespace Domain

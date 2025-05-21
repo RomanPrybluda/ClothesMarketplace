@@ -2,7 +2,7 @@
 using Domain.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Domain.Services.Brand
+namespace Domain
 {
     public class BrandService
     {

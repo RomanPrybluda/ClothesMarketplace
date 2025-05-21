@@ -1,15 +1,9 @@
-﻿using Azure.Core;
-using DAL;
+﻿using DAL;
 using DAL.Repository;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Domain.Validators
+namespace Domain
 {
     public class LoginDtoValidator : AbstractValidator<LoginDTO>
     {
@@ -34,7 +28,7 @@ namespace Domain.Validators
                     return !isValid;
                 })
                 .WithMessage("Invalid password. Please check the password and try again")
-                .WhenAsync(async (x,cancellationTokjen) => await userRepository.FindByEmailAsync(x.Email) != null);
+                .WhenAsync(async (x, cancellationTokjen) => await userRepository.FindByEmailAsync(x.Email) != null);
         }
     }
 }

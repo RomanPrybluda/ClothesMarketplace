@@ -1,12 +1,7 @@
 ﻿using DAL.Repository;
 using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Domain.Validators
+namespace Domain
 {
     public class RegistrationDtoValidator : AbstractValidator<RegistrationDTO>
     {
@@ -56,5 +51,5 @@ namespace Domain.Validators
                 .WithMessage("Last name must be less than 30 characters");
         }
     }
-    
+
 }
