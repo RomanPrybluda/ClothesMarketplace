@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using DAL;
 using DAL.Models;
-using Domain.Services.Auth.DTO;
-using Domain.Validators;
 using Domain.Сommon.Wrappers;
 using FluentValidation;
 using Microsoft.AspNetCore.Identity;
@@ -30,7 +28,7 @@ public class AuthService(
         var user = mapper.Map<AppUser>(request);
         user.RefreshToken = _jwtService.GenerateRefreshToken();
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
-        
+
         var userCreationResult = await _userService.CreateUserAsync(user, request.Password, userRole);
 
         if (!userCreationResult.IsSuccess)
@@ -49,7 +47,7 @@ public class AuthService(
     public async Task<Result<LoginResponseDTO>> LoginAsync(LoginDTO request)
     {
         var validationResult = await loginValidator.ValidateAsync(request);
-        
+
         if (!validationResult.IsValid)
             return Result<LoginResponseDTO>.Failure(validationResult.Errors);
 

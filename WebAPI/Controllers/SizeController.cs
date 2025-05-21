@@ -1,5 +1,4 @@
 ﻿using Domain;
-using Domain.Services.Size.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;

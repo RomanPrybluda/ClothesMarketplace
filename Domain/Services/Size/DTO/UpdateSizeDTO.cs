@@ -1,6 +1,6 @@
 ﻿using DAL;
 
-namespace Domain.Services.Size.DTO
+namespace Domain
 {
     public class UpdateSizeDTO
     {

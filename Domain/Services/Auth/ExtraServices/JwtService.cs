@@ -1,8 +1,5 @@
 ﻿using DAL;
 using DAL.Models;
-using Domain.Services.Auth.DTO;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -15,7 +12,7 @@ namespace Domain;
 public class JwtService
 {
     private readonly JwtTokenOptions _tokenOptions;
-    
+
     public JwtService(IOptions<JwtTokenOptions> tokenOptions)
     {
         _tokenOptions = tokenOptions.Value;
@@ -38,7 +35,7 @@ public class JwtService
             _tokenOptions.Audience,
             claims,
             expires: DateTime.UtcNow.AddMinutes(30),
-            signingCredentials:credentials 
+            signingCredentials: credentials
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);

@@ -2,12 +2,7 @@ using DAL;
 using DAL.Repository;
 using Domain;
 using Domain.Abstractions;
-using Domain.Helpers;
 using Domain.Mapping;
-using Domain.Services.Auth.DTO;
-using Domain.Services.Brand;
-using Domain.Services.Images;
-using Domain.Validators;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -40,7 +35,10 @@ if (string.IsNullOrWhiteSpace(connectionString))
 }
 
 var jwtTokenOptions = new JwtTokenOptions();
-builder.Configuration.GetSection("JwtTokenOptions").Bind(jwtTokenOptions);
+builder.Configuration.GetSection(nameof(JwtTokenOptions)).Bind(jwtTokenOptions);
+
+builder.Services.Configure<ImageEncoderSettings>(
+    builder.Configuration.GetSection(nameof(ImageEncoderSettings)));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -140,12 +138,13 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<ImageCleanupService>();
 builder.Services.AddAutoMapper(typeof(UserRegistrationProfileMap));
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ImageValidator>();
 
-builder.Services.Configure<JwtTokenOptions>(configuration.GetSection("JwtTokenOptions"));
+builder.Services.Configure<JwtTokenOptions>(configuration.GetSection(nameof(JwtTokenOptions)));
 
 builder.Logging.AddConsole();
 

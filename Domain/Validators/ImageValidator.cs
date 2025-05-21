@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
 
-namespace Domain.Validators
+namespace Domain
 {
     public class ImageValidator : AbstractValidator<IFormFile>
     {
