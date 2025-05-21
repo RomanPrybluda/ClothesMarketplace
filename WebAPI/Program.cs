@@ -140,6 +140,7 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IImageEncoderFactory, ImageEncoderFactory>();
 builder.Services.AddScoped<BrandService>();
 builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<ImageCleanupService>();
 builder.Services.AddAutoMapper(typeof(UserRegistrationProfileMap));
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
